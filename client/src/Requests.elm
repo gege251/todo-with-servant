@@ -5,6 +5,7 @@ import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode
 import String
+import Url.Builder
 
 
 type NoContent
@@ -98,11 +99,7 @@ getTodoByTodoId toMsg capture_todoId =
         , headers =
             []
         , url =
-            String.join "/"
-                [ "http://localhost:3030"
-                , "todo"
-                , capture_todoId |> String.fromInt |> Url.percentEncode
-                ]
+            Url.Builder.crossOrigin "http://localhost:3030" [ "todo", capture_todoId |> String.fromInt ] []
         , body =
             Http.emptyBody
         , expect =
@@ -185,11 +182,7 @@ deleteTodoByTodoId toMsg capture_todoId =
         , headers =
             []
         , url =
-            String.join "/"
-                [ "http://localhost:3030"
-                , "todo"
-                , capture_todoId |> String.fromInt |> Url.percentEncode
-                ]
+            Url.Builder.crossOrigin "http://localhost:3030" [ "todo", capture_todoId |> String.fromInt ] []
         , body =
             Http.emptyBody
         , expect =
@@ -230,11 +223,7 @@ putTodoByTodoId toMsg capture_todoId body =
         , headers =
             []
         , url =
-            String.join "/"
-                [ "http://localhost:3030"
-                , "todo"
-                , capture_todoId |> String.fromInt |> Url.percentEncode
-                ]
+            Url.Builder.crossOrigin "http://localhost:3030" [ "todo", capture_todoId |> String.fromInt ] []
         , body =
             Http.jsonBody (encodeTodo body)
         , expect =

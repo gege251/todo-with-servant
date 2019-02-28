@@ -7,6 +7,7 @@ import Html.Styled.Attributes exposing (..)
 import Html.Styled.Events exposing (onClick, onInput, onSubmit)
 import List.Extra exposing (updateIf)
 import RemoteData exposing (WebData, toMaybe)
+import RemoteData.Extra exposing (fromResult)
 import Requests
 import Style
 import Utils exposing (..)
@@ -49,9 +50,7 @@ initModel =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( initModel
-    , Requests.getTodo
-        |> RemoteData.sendRequest
-        |> Cmd.map AfterGetTodo
+    , Requests.getTodo (fromResult >> AfterGetTodo)
     )
 
 
@@ -87,9 +86,9 @@ update msg model =
                             }
                     in
                     ( newtodo :: todos
-                    , Requests.postTodo (Requests.NewTodo newvalue)
-                        |> RemoteData.sendRequest
-                        |> Cmd.map (AfterPostTodo newtodo.id)
+                    , Requests.postTodo
+                        (fromResult >> AfterPostTodo newtodo.id)
+                        (Requests.NewTodo newvalue)
                     )
             in
             ( { model | todos = newtodos, newtodo = "" }
@@ -104,9 +103,7 @@ update msg model =
                 delTodo : List Todo -> ( List Todo, Cmd Msg )
                 delTodo todos =
                     ( List.filter (\t -> t.id /= id) todos
-                    , Requests.deleteTodoByTodoId id
-                        |> RemoteData.sendRequest
-                        |> Cmd.map (\_ -> NoOp)
+                    , Requests.deleteTodoByTodoId (\_ -> NoOp) id
                     )
             in
             ( { model | todos = newtodos }
@@ -130,9 +127,7 @@ update msg model =
 
                         Just todo ->
                             ( List.Extra.setIf (\t -> t.id == id) todo todos
-                            , Requests.putTodoByTodoId id todo
-                                |> RemoteData.sendRequest
-                                |> Cmd.map (\_ -> NoOp)
+                            , Requests.putTodoByTodoId (\_ -> NoOp) id todo
                             )
 
                 ( newtodos, cmd ) =
