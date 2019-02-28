@@ -1,0 +1,69 @@
+name: servant-persistent-todoapi
+version: 0.1.0.0
+github: "gege251/servant-persistent-todoapi"
+license: BSD3
+author: "Szabo Gergely"
+copyright: "2018 Szabo Gergely"
+
+description: Please see the README on Github at <https://github.com/gege251/servant-persitent-todoapi#readme>
+
+ghc-options: -Wall
+
+tests:
+  spec:
+    main: Spec.hs
+    source-dirs:
+      - test
+    dependencies:
+      - hspec
+      - servant-persistent-todoapi
+      - servant-client
+      - warp
+      - http-client
+      - http-types
+
+library:
+  source-dirs:
+    - src
+
+executables:
+  todoapi:
+    main: Main.hs
+    source-dirs: exe/TodoApi
+    dependencies:
+      - servant-persistent-todoapi
+
+  todoapi-gen-elm:
+    main: Main.hs
+    source-dirs: exe/GenerateElm
+    dependencies:
+      - servant-persistent-todoapi
+
+  todoapi-gen-docs:
+    main: Main.hs
+    source-dirs: exe/GenerateDocs
+    dependencies:
+      - servant-persistent-todoapi
+
+dependencies:
+  - aeson
+  - base
+  - elm-export
+  - servant
+  - servant-server <= 0.13
+  - servant-elm
+  - servant-docs
+  - transformers
+  - aeson
+  - wai
+  - wai-cors
+  - warp
+  - text
+  - bytestring
+  - persistent
+  - persistent-sqlite
+  - persistent-template
+  - resource-pool
+  - mtl
+  - monad-logger
+  - unliftio-core

@@ -1,0 +1,8 @@
+resolver: lts-11.1
+packages:
+  - "."
+
+  - location:
+      git: git@github.com:gege251/servant-elm
+      commit: 96bafc59c87b72606a75dfff3188002d90680735
+    extra-dep: true
