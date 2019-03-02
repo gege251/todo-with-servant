@@ -7,7 +7,7 @@ import Html.Styled.Attributes exposing (..)
 import Html.Styled.Events exposing (onClick, onInput, onSubmit)
 import List.Extra exposing (updateIf)
 import RemoteData exposing (WebData, toMaybe)
-import Requests
+import Requests.Todo as Requests
 import Style
 import Utils exposing (..)
 

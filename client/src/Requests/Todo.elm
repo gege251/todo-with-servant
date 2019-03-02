@@ -1,4 +1,4 @@
-module Requests exposing (..)
+module Requests.Todo exposing (NewTodo, NoContent(..), Todo, decodeTodo, deleteTodoByTodoId, encodeNewTodo, encodeTodo, getTodo, getTodoByTodoId, postTodo, putTodoByTodoId)
 
 import Http
 import Json.Decode exposing (..)
@@ -6,7 +6,6 @@ import Json.Decode.Pipeline exposing (..)
 import Json.Encode
 import String
 import Url.Builder
-
 
 
 type NoContent
@@ -49,7 +48,7 @@ encodeNewTodo x =
         ]
 
 
-getTodo : (Result Http.Error (List (Todo)) -> msg) -> Cmd msg
+getTodo : (Result Http.Error (List Todo) -> msg) -> Cmd msg
 getTodo toMsg =
     Http.request
         { method =
@@ -72,7 +71,7 @@ getTodo toMsg =
         }
 
 
-getTodoByTodoId : (Result Http.Error (Maybe (Todo)) -> msg) -> Int -> Cmd msg
+getTodoByTodoId : (Result Http.Error (Maybe Todo) -> msg) -> Int -> Cmd msg
 getTodoByTodoId toMsg capture_todoId =
     Http.request
         { method =
@@ -96,7 +95,7 @@ getTodoByTodoId toMsg capture_todoId =
         }
 
 
-postTodo : (Result Http.Error (Todo) -> msg) -> NewTodo -> Cmd msg
+postTodo : (Result Http.Error Todo -> msg) -> NewTodo -> Cmd msg
 postTodo toMsg body =
     Http.request
         { method =
@@ -119,7 +118,7 @@ postTodo toMsg body =
         }
 
 
-deleteTodoByTodoId : (Result Http.Error (NoContent) -> msg) -> Int -> Cmd msg
+deleteTodoByTodoId : (Result Http.Error NoContent -> msg) -> Int -> Cmd msg
 deleteTodoByTodoId toMsg capture_todoId =
     Http.request
         { method =
@@ -140,6 +139,7 @@ deleteTodoByTodoId toMsg capture_todoId =
                     case response of
                         Http.GoodStatus_ _ "" ->
                             Ok NoContent
+
                         _ ->
                             Err (Http.BadBody "Expected the response body to be empty")
                 )
@@ -150,7 +150,7 @@ deleteTodoByTodoId toMsg capture_todoId =
         }
 
 
-putTodoByTodoId : (Result Http.Error (NoContent) -> msg) -> Int -> Todo -> Cmd msg
+putTodoByTodoId : (Result Http.Error NoContent -> msg) -> Int -> Todo -> Cmd msg
 putTodoByTodoId toMsg capture_todoId body =
     Http.request
         { method =
@@ -171,6 +171,7 @@ putTodoByTodoId toMsg capture_todoId body =
                     case response of
                         Http.GoodStatus_ _ "" ->
                             Ok NoContent
+
                         _ ->
                             Err (Http.BadBody "Expected the response body to be empty")
                 )

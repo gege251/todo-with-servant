@@ -29,7 +29,7 @@ import           Api                            ( TodoApi )
 
 
 elmPath :: String
-elmPath = "../client/src/Requests.elm"
+elmPath = "../client/src/Requests/Todo.elm"
 
 options :: ElmOptions
 options = defElmOptions { urlPrefix = Static "http://localhost:3030" }
@@ -41,7 +41,7 @@ elmHeader moduleName =
 
 elmfile :: [Text]
 elmfile =
-  elmHeader "Requests"
+  elmHeader "Requests.Todo"
     : "type NoContent\n    = NoContent"
     : toElmTypeSource (Proxy :: Proxy Todo)
     : toElmTypeSource (Proxy :: Proxy NewTodo)
