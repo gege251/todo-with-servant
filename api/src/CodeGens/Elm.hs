@@ -17,6 +17,7 @@ import           Elm                            ( toElmDecoderSource
 import           Servant.Elm                    ( Proxy(Proxy)
                                                 , ElmOptions
                                                 , defElmOptions
+                                                , defElmImports
                                                 , UrlPrefix(..)
                                                 , urlPrefix
                                                 , generateElmForAPIWith
@@ -35,15 +36,7 @@ options = defElmOptions { urlPrefix = Static "http://localhost:3030" }
 
 elmHeader :: String -> Text
 elmHeader moduleName =
-  "module "
-    <> pack moduleName
-    <> " exposing (..)\n\
-  \\n\  
-  \import Json.Decode exposing (..)\n\
-  \import Json.Decode.Pipeline exposing (..)\n\
-  \import Json.Encode\n\
-  \import Http\n\
-  \import String"
+  "module " <> pack moduleName <> " exposing (..)\n\n" <> defElmImports
 
 
 elmfile :: [Text]

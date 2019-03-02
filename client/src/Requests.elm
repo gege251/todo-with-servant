@@ -1,4 +1,4 @@
-module Requests exposing (NewTodo, NoContent(..), Todo, decodeTodo, deleteTodoByTodoId, encodeNewTodo, encodeTodo, getTodo, getTodoByTodoId, postTodo, putTodoByTodoId)
+module Requests exposing (..)
 
 import Http
 import Json.Decode exposing (..)
@@ -6,6 +6,7 @@ import Json.Decode.Pipeline exposing (..)
 import Json.Encode
 import String
 import Url.Builder
+
 
 
 type NoContent
@@ -26,7 +27,7 @@ type alias NewTodo =
 
 decodeTodo : Decoder Todo
 decodeTodo =
-    succeed Todo
+    Json.Decode.succeed Todo
         |> required "id" int
         |> required "value" string
         |> required "done" bool
@@ -48,7 +49,7 @@ encodeNewTodo x =
         ]
 
 
-getTodo : (Result ( Maybe ( Http.Metadata, String ), Http.Error ) (List Todo) -> msg) -> Cmd msg
+getTodo : (Result Http.Error (List (Todo)) -> msg) -> Cmd msg
 getTodo toMsg =
     Http.request
         { method =
@@ -56,34 +57,14 @@ getTodo toMsg =
         , headers =
             []
         , url =
-            String.join "/"
-                [ "http://localhost:3030"
-                , "todo"
+            Url.Builder.crossOrigin "http://localhost:3030"
+                [ "todo"
                 ]
+                []
         , body =
             Http.emptyBody
         , expect =
-            Http.expectStringResponse toMsg
-                (\res ->
-                    case res of
-                        Http.BadUrl_ url ->
-                            Err ( Nothing, Http.BadUrl url )
-
-                        Http.Timeout_ ->
-                            Err ( Nothing, Http.Timeout )
-
-                        Http.NetworkError_ ->
-                            Err ( Nothing, Http.NetworkError )
-
-                        Http.BadStatus_ metadata body_ ->
-                            Err ( Just ( metadata, body_ ), Http.BadStatus metadata.statusCode )
-
-                        Http.GoodStatus_ metadata body_ ->
-                            decodeString (list decodeTodo) body_
-                                |> Result.mapError Json.Decode.errorToString
-                                |> Result.mapError Http.BadBody
-                                |> Result.mapError (Tuple.pair (Just ( metadata, body_ )))
-                )
+            Http.expectJson toMsg (list decodeTodo)
         , timeout =
             Nothing
         , tracker =
@@ -91,7 +72,7 @@ getTodo toMsg =
         }
 
 
-getTodoByTodoId : (Result ( Maybe ( Http.Metadata, String ), Http.Error ) (Maybe Todo) -> msg) -> Int -> Cmd msg
+getTodoByTodoId : (Result Http.Error (Maybe (Todo)) -> msg) -> Int -> Cmd msg
 getTodoByTodoId toMsg capture_todoId =
     Http.request
         { method =
@@ -99,31 +80,15 @@ getTodoByTodoId toMsg capture_todoId =
         , headers =
             []
         , url =
-            Url.Builder.crossOrigin "http://localhost:3030" [ "todo", capture_todoId |> String.fromInt ] []
+            Url.Builder.crossOrigin "http://localhost:3030"
+                [ "todo"
+                , String.fromInt <| capture_todoId
+                ]
+                []
         , body =
             Http.emptyBody
         , expect =
-            Http.expectStringResponse toMsg
-                (\res ->
-                    case res of
-                        Http.BadUrl_ url ->
-                            Err ( Nothing, Http.BadUrl url )
-
-                        Http.Timeout_ ->
-                            Err ( Nothing, Http.Timeout )
-
-                        Http.NetworkError_ ->
-                            Err ( Nothing, Http.NetworkError )
-
-                        Http.BadStatus_ metadata body_ ->
-                            Err ( Just ( metadata, body_ ), Http.BadStatus metadata.statusCode )
-
-                        Http.GoodStatus_ metadata body_ ->
-                            decodeString (maybe decodeTodo) body_
-                                |> Result.mapError Json.Decode.errorToString
-                                |> Result.mapError Http.BadBody
-                                |> Result.mapError (Tuple.pair (Just ( metadata, body_ )))
-                )
+            Http.expectJson toMsg (nullable decodeTodo)
         , timeout =
             Nothing
         , tracker =
@@ -131,7 +96,7 @@ getTodoByTodoId toMsg capture_todoId =
         }
 
 
-postTodo : (Result ( Maybe ( Http.Metadata, String ), Http.Error ) Todo -> msg) -> NewTodo -> Cmd msg
+postTodo : (Result Http.Error (Todo) -> msg) -> NewTodo -> Cmd msg
 postTodo toMsg body =
     Http.request
         { method =
@@ -139,34 +104,14 @@ postTodo toMsg body =
         , headers =
             []
         , url =
-            String.join "/"
-                [ "http://localhost:3030"
-                , "todo"
+            Url.Builder.crossOrigin "http://localhost:3030"
+                [ "todo"
                 ]
+                []
         , body =
             Http.jsonBody (encodeNewTodo body)
         , expect =
-            Http.expectStringResponse toMsg
-                (\res ->
-                    case res of
-                        Http.BadUrl_ url ->
-                            Err ( Nothing, Http.BadUrl url )
-
-                        Http.Timeout_ ->
-                            Err ( Nothing, Http.Timeout )
-
-                        Http.NetworkError_ ->
-                            Err ( Nothing, Http.NetworkError )
-
-                        Http.BadStatus_ metadata body_ ->
-                            Err ( Just ( metadata, body_ ), Http.BadStatus metadata.statusCode )
-
-                        Http.GoodStatus_ metadata body_ ->
-                            decodeString decodeTodo body_
-                                |> Result.mapError Json.Decode.errorToString
-                                |> Result.mapError Http.BadBody
-                                |> Result.mapError (Tuple.pair (Just ( metadata, body_ )))
-                )
+            Http.expectJson toMsg decodeTodo
         , timeout =
             Nothing
         , tracker =
@@ -174,7 +119,7 @@ postTodo toMsg body =
         }
 
 
-deleteTodoByTodoId : (Result ( Maybe ( Http.Metadata, String ), Http.Error ) NoContent -> msg) -> Int -> Cmd msg
+deleteTodoByTodoId : (Result Http.Error (NoContent) -> msg) -> Int -> Cmd msg
 deleteTodoByTodoId toMsg capture_todoId =
     Http.request
         { method =
@@ -182,31 +127,21 @@ deleteTodoByTodoId toMsg capture_todoId =
         , headers =
             []
         , url =
-            Url.Builder.crossOrigin "http://localhost:3030" [ "todo", capture_todoId |> String.fromInt ] []
+            Url.Builder.crossOrigin "http://localhost:3030"
+                [ "todo"
+                , String.fromInt <| capture_todoId
+                ]
+                []
         , body =
             Http.emptyBody
         , expect =
             Http.expectStringResponse toMsg
-                (\res ->
-                    case res of
-                        Http.BadUrl_ url ->
-                            Err ( Nothing, Http.BadUrl url )
-
-                        Http.Timeout_ ->
-                            Err ( Nothing, Http.Timeout )
-
-                        Http.NetworkError_ ->
-                            Err ( Nothing, Http.NetworkError )
-
-                        Http.BadStatus_ metadata body_ ->
-                            Err ( Just ( metadata, body_ ), Http.BadStatus metadata.statusCode )
-
-                        Http.GoodStatus_ metadata body_ ->
-                            if String.isEmpty body_ then
-                                Ok NoContent
-
-                            else
-                                Err ( Just ( metadata, body_ ), Http.BadBody <| "Expected the response body to be empty, but it was '" ++ body_ ++ "'." )
+                (\response ->
+                    case response of
+                        Http.GoodStatus_ _ "" ->
+                            Ok NoContent
+                        _ ->
+                            Err (Http.BadBody "Expected the response body to be empty")
                 )
         , timeout =
             Nothing
@@ -215,7 +150,7 @@ deleteTodoByTodoId toMsg capture_todoId =
         }
 
 
-putTodoByTodoId : (Result ( Maybe ( Http.Metadata, String ), Http.Error ) NoContent -> msg) -> Int -> Todo -> Cmd msg
+putTodoByTodoId : (Result Http.Error (NoContent) -> msg) -> Int -> Todo -> Cmd msg
 putTodoByTodoId toMsg capture_todoId body =
     Http.request
         { method =
@@ -223,31 +158,21 @@ putTodoByTodoId toMsg capture_todoId body =
         , headers =
             []
         , url =
-            Url.Builder.crossOrigin "http://localhost:3030" [ "todo", capture_todoId |> String.fromInt ] []
+            Url.Builder.crossOrigin "http://localhost:3030"
+                [ "todo"
+                , String.fromInt <| capture_todoId
+                ]
+                []
         , body =
             Http.jsonBody (encodeTodo body)
         , expect =
             Http.expectStringResponse toMsg
-                (\res ->
-                    case res of
-                        Http.BadUrl_ url ->
-                            Err ( Nothing, Http.BadUrl url )
-
-                        Http.Timeout_ ->
-                            Err ( Nothing, Http.Timeout )
-
-                        Http.NetworkError_ ->
-                            Err ( Nothing, Http.NetworkError )
-
-                        Http.BadStatus_ metadata body_ ->
-                            Err ( Just ( metadata, body_ ), Http.BadStatus metadata.statusCode )
-
-                        Http.GoodStatus_ metadata body_ ->
-                            if String.isEmpty body_ then
-                                Ok NoContent
-
-                            else
-                                Err ( Just ( metadata, body_ ), Http.BadBody <| "Expected the response body to be empty, but it was '" ++ body_ ++ "'." )
+                (\response ->
+                    case response of
+                        Http.GoodStatus_ _ "" ->
+                            Ok NoContent
+                        _ ->
+                            Err (Http.BadBody "Expected the response body to be empty")
                 )
         , timeout =
             Nothing

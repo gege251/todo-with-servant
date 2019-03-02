@@ -7,7 +7,6 @@ import Html.Styled.Attributes exposing (..)
 import Html.Styled.Events exposing (onClick, onInput, onSubmit)
 import List.Extra exposing (updateIf)
 import RemoteData exposing (WebData, toMaybe)
-import RemoteData.Extra exposing (fromResult)
 import Requests
 import Style
 import Utils exposing (..)
@@ -50,7 +49,7 @@ initModel =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( initModel
-    , Requests.getTodo (fromResult >> AfterGetTodo)
+    , Requests.getTodo (RemoteData.fromResult >> AfterGetTodo)
     )
 
 
@@ -87,7 +86,7 @@ update msg model =
                     in
                     ( newtodo :: todos
                     , Requests.postTodo
-                        (fromResult >> AfterPostTodo newtodo.id)
+                        (RemoteData.fromResult >> AfterPostTodo newtodo.id)
                         (Requests.NewTodo newvalue)
                     )
             in
