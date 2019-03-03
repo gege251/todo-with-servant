@@ -24,7 +24,7 @@ import           Config                         ( AppM )
 
 type TodoApi =
   -- GET /todo Returns every todo
-  "todo" :> Get '[JSON] [Todo] :<|>
+  "todo" :> QueryParam "filter" Bool :> Get '[JSON] [Todo] :<|>
 
   -- GET /todo/:todoId Returns the todo with the given ID
   "todo" :> Capture "todoId" Int64 :> Get '[JSON] (Maybe Todo) :<|>
@@ -54,6 +54,8 @@ server =
 
 -- DOCS
 
+instance ToParam (QueryParam "filter" Bool) where
+  toParam _ = DocQueryParam "filter" [] "Filter by done state" Normal
 
 instance ToCapture (Capture "todoId" Int64) where
   toCapture _ = DocCapture "todoId" "(integer) Todo ID"

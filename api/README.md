@@ -8,6 +8,13 @@ API version: 1.0.0
 
 ## GET /todo
 
+### GET Parameters:
+
+- filter
+     - **Values**: **
+     - **Description**: Filter by done state
+
+
 ### Response:
 
 - Status code 200

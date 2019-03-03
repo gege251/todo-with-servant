@@ -15,11 +15,13 @@ import Utils exposing (..)
 type Msg
     = NoOp
     | InputTodoField String
-    | SubmitTodo String
+    | SubmitTodo
+    | ToggleFilter
+    | RemoveFilter
     | DelTodo Int
     | ToggleTodo Int
-    | AfterGetTodo (WebData (List Todo))
-    | AfterPostTodo Int (WebData Todo)
+    | GotTodos (WebData (List Todo))
+    | PostedTodo Int (WebData Todo)
 
 
 type alias Todo =
@@ -30,8 +32,9 @@ type alias Todo =
 
 
 type alias Model =
-    { newtodo : String
+    { newTodo : String
     , todos : WebData (List Todo)
+    , filter : Maybe Bool
     }
 
 
@@ -41,15 +44,16 @@ type alias Model =
 
 initModel : Model
 initModel =
-    { newtodo = ""
+    { newTodo = ""
     , todos = RemoteData.NotAsked
+    , filter = Nothing
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( initModel
-    , Requests.getTodo (RemoteData.fromResult >> AfterGetTodo)
+    , Requests.getTodo (RemoteData.fromResult >> GotTodos) Nothing
     )
 
 
@@ -65,38 +69,57 @@ update msg model =
             , Cmd.none
             )
 
-        InputTodoField newtodo ->
-            ( { model | newtodo = newtodo }
+        InputTodoField newTodo ->
+            ( { model | newTodo = newTodo }
             , Cmd.none
             )
 
-        SubmitTodo newvalue ->
+        SubmitTodo ->
             let
-                ( newtodos, cmd ) =
+                ( newTodos, cmd ) =
                     RemoteData.update addTodo model.todos
 
                 addTodo : List Todo -> ( List Todo, Cmd Msg )
                 addTodo todos =
                     let
-                        newtodo =
+                        newTodo =
                             { id = uniqueId (List.map .id todos)
-                            , value = newvalue
+                            , value = model.newTodo
                             , done = False
                             }
                     in
-                    ( newtodo :: todos
+                    ( newTodo :: todos
                     , Requests.postTodo
-                        (RemoteData.fromResult >> AfterPostTodo newtodo.id)
-                        (Requests.NewTodo newvalue)
+                        (RemoteData.fromResult >> PostedTodo newTodo.id)
+                        (Requests.NewTodo model.newTodo)
                     )
             in
-            ( { model | todos = newtodos, newtodo = "" }
+            ( { model | todos = newTodos, newTodo = "" }
             , cmd
+            )
+
+        ToggleFilter ->
+            let
+                newFilter =
+                    case model.filter of
+                        Nothing ->
+                            Just False
+
+                        Just filter ->
+                            Just (not filter)
+            in
+            ( { model | filter = newFilter }
+            , Requests.getTodo (RemoteData.fromResult >> GotTodos) newFilter
+            )
+
+        RemoveFilter ->
+            ( { model | filter = Nothing }
+            , Requests.getTodo (RemoteData.fromResult >> GotTodos) Nothing
             )
 
         DelTodo id ->
             let
-                ( newtodos, cmd ) =
+                ( newTodos, cmd ) =
                     RemoteData.update delTodo model.todos
 
                 delTodo : List Todo -> ( List Todo, Cmd Msg )
@@ -105,7 +128,7 @@ update msg model =
                     , Requests.deleteTodoByTodoId (\_ -> NoOp) id
                     )
             in
-            ( { model | todos = newtodos }
+            ( { model | todos = newTodos }
             , cmd
             )
 
@@ -129,42 +152,36 @@ update msg model =
                             , Requests.putTodoByTodoId (\_ -> NoOp) id todo
                             )
 
-                ( newtodos, cmd ) =
+                ( newTodos, cmd ) =
                     RemoteData.update toggleTodo model.todos
             in
-            ( { model | todos = newtodos }
+            ( { model | todos = newTodos }
             , cmd
             )
 
-        AfterGetTodo response ->
+        GotTodos response ->
             ( { model | todos = response }
             , Cmd.none
             )
 
-        AfterPostTodo oldId response ->
+        PostedTodo oldId response ->
             case RemoteData.toMaybe response of
                 Nothing ->
                     ( model
                     , Cmd.none
                     )
 
-                Just newtodo ->
+                Just newTodo ->
                     let
-                        ( newtodos, cmd ) =
-                            RemoteData.update amendId model.todos
-
-                        amendId : List Todo -> ( List Todo, Cmd Msg )
+                        amendId : List Todo -> List Todo
                         amendId todos =
-                            let
-                                updateId todo =
-                                    { todo | id = newtodo.id }
-                            in
-                            ( List.Extra.updateIf (\t -> t.id == oldId) updateId todos
-                            , Cmd.none
-                            )
+                            List.Extra.updateIf (\t -> t.id == oldId) updateId todos
+
+                        updateId todo =
+                            { todo | id = newTodo.id }
                     in
-                    ( { model | todos = newtodos }
-                    , cmd
+                    ( { model | todos = RemoteData.map amendId model.todos }
+                    , Cmd.none
                     )
 
 
@@ -176,6 +193,11 @@ view : Model -> Html Msg
 view model =
     div []
         [ viewHeader model
+        , viewForm model.newTodo
+        , button [ Style.form__btn, onClick ToggleFilter ]
+            [ text "Toggle filter" ]
+        , button [ Style.form__btn, onClick RemoveFilter, disabled (model.filter == Nothing) ]
+            [ text "Remove filter" ]
         , div [ Style.container ]
             [ h1 [] [ text "Todo list" ]
             , viewTodoList model.todos
@@ -188,24 +210,27 @@ viewHeader : Model -> Html Msg
 viewHeader model =
     div [ Style.nav ]
         [ div [ Style.nav__container ]
-            [ div [ Style.nav__title ] [ text "Todo App" ]
-            , Html.Styled.form
-                [ Style.form
-                , onSubmit (SubmitTodo model.newtodo)
-                ]
-                [ input
-                    [ Style.form__txt
-                    , type_ "text"
-                    , placeholder "todo"
-                    , value model.newtodo
-                    , onInput InputTodoField
-                    ]
-                    []
-                , button
-                    [ Style.form__btn, disabled (model.newtodo == "") ]
-                    [ text "OK" ]
-                ]
+            [ div [ Style.nav__title ] [ text "Todo App" ] ]
+        ]
+
+
+viewForm : String -> Html Msg
+viewForm newTodo =
+    Html.Styled.form
+        [ Style.form
+        , onSubmit SubmitTodo
+        ]
+        [ input
+            [ Style.form__txt
+            , type_ "text"
+            , placeholder "Create a new task"
+            , value newTodo
+            , onInput InputTodoField
             ]
+            []
+        , button
+            [ Style.form__btn, disabled (newTodo == "") ]
+            [ text "OK" ]
         ]
 
 
