@@ -3,7 +3,7 @@ packages:
   - "."
   - location:
       git: git@github.com:gege251/servant-elm
-      commit: 75623d9aaa82e7095b45afbfef464d4224ee8f7a
+      commit: 16705b3958894812352a4619ebdd010cc2f2673e
     extra-dep: true
   - location:
       git: git@github.com:gege251/elm-export

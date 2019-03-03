@@ -4,6 +4,7 @@
 module TodoActions where
 
 import           GHC.Int                        ( Int64 )
+import           Data.Maybe                     ( maybeToList )
 import           Database.Persist               ( Entity(Entity)
                                                 , (==.)
                                                 )
@@ -31,9 +32,10 @@ toApiModel (Entity key todo) =
   Api.Todo (fromSqlKey key) (Db.todoValue todo) (Db.todoDone todo)
 
 
-getTodos :: AppM [Api.Todo]
-getTodos = do
-  todos :: [Entity Db.Todo] <- runDB $ selectList [] []
+getTodos :: Maybe Bool -> AppM [Api.Todo]
+getTodos maybeFilter = do
+  let filters = (==.) Db.TodoDone <$> maybeToList maybeFilter
+  todos :: [Entity Db.Todo] <- runDB $ selectList filters []
   return $ map toApiModel todos
 
 
