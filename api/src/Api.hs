@@ -24,19 +24,30 @@ import           Config                         ( AppM )
 
 type TodoApi =
   -- GET /todo Returns every todo
-  "todo" :> QueryParam "filter" Bool :> Get '[JSON] [Todo] :<|>
-
+  "todo"
+    :> QueryParam "filter" Bool 
+    :> Get '[JSON] [Todo]
+    
   -- GET /todo/:todoId Returns the todo with the given ID
-  "todo" :> Capture "todoId" Int64 :> Get '[JSON] (Maybe Todo) :<|>
+  :<|> "todo" 
+    :> Capture "todoId" Int64
+    :> Get '[JSON] (Maybe Todo)
 
   -- POST /todo Creates a new todo
-  "todo" :> ReqBody '[JSON] NewTodo :> PostCreated '[JSON] Todo :<|>
+  :<|> "todo"
+    :> ReqBody '[JSON] NewTodo
+    :> PostCreated '[JSON] Todo
 
   -- DELETE /todo/:todoid Deletes todo with the given ID
-  "todo" :> Capture "todoId" Int64 :> DeleteAccepted '[JSON] NoContent :<|>
+  :<|> "todo"
+    :> Capture "todoId" Int64
+    :> DeleteAccepted '[JSON] NoContent
 
   -- PUT /todo/:todoid Replaces todo of the given ID
-  "todo" :> Capture "todoId" Int64 :> ReqBody '[JSON] Todo :> PutAccepted '[JSON] NoContent
+  :<|> "todo"
+    :> Capture "todoId" Int64 
+    :> ReqBody '[JSON] Todo 
+    :> PutAccepted '[JSON] NoContent
 
 
 todoApi :: Proxy TodoApi
