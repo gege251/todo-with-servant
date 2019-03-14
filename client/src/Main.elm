@@ -6,6 +6,7 @@ import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Html.Styled.Events exposing (onClick, onInput, onSubmit)
 import List.Extra exposing (updateIf)
+import Maybe.Extra exposing (isJust)
 import RemoteData exposing (WebData, toMaybe)
 import Requests.Todo as Requests
 import Style
@@ -18,8 +19,10 @@ type Msg
     | SubmitTodo String
     | DelTodo Int
     | ToggleTodo Int
-    | AfterGetTodo (WebData (List Todo))
-    | AfterPostTodo Int (WebData Todo)
+    | ToggleFilter
+    | ToggleFilterVal
+    | GotTodo (WebData (List Todo))
+    | PostedTodo Int (WebData Todo)
 
 
 type alias Todo =
@@ -32,6 +35,7 @@ type alias Todo =
 type alias Model =
     { newtodo : String
     , todos : WebData (List Todo)
+    , filter : Maybe Bool
     }
 
 
@@ -43,13 +47,14 @@ initModel : Model
 initModel =
     { newtodo = ""
     , todos = RemoteData.NotAsked
+    , filter = Nothing
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( initModel
-    , Requests.getTodo (RemoteData.fromResult >> AfterGetTodo)
+    , Requests.getTodo (RemoteData.fromResult >> GotTodo) initModel.filter
     )
 
 
@@ -86,7 +91,7 @@ update msg model =
                     in
                     ( newtodo :: todos
                     , Requests.postTodo
-                        (RemoteData.fromResult >> AfterPostTodo newtodo.id)
+                        (RemoteData.fromResult >> PostedTodo newtodo.id)
                         (Requests.NewTodo newvalue)
                     )
             in
@@ -107,6 +112,28 @@ update msg model =
             in
             ( { model | todos = newtodos }
             , cmd
+            )
+
+        ToggleFilter ->
+            let
+                filter =
+                    if isJust model.filter then
+                        Nothing
+
+                    else
+                        Just False
+            in
+            ( { model | filter = filter }
+            , Requests.getTodo (RemoteData.fromResult >> GotTodo) filter
+            )
+
+        ToggleFilterVal ->
+            let
+                filter =
+                    Maybe.map not model.filter
+            in
+            ( { model | filter = filter }
+            , Requests.getTodo (RemoteData.fromResult >> GotTodo) filter
             )
 
         ToggleTodo id ->
@@ -136,12 +163,12 @@ update msg model =
             , cmd
             )
 
-        AfterGetTodo response ->
+        GotTodo response ->
             ( { model | todos = response }
             , Cmd.none
             )
 
-        AfterPostTodo oldId response ->
+        PostedTodo oldId response ->
             case RemoteData.toMaybe response of
                 Nothing ->
                     ( model
@@ -176,6 +203,8 @@ view : Model -> Html Msg
 view model =
     div []
         [ viewHeader model
+        , viewInputForm model.newtodo
+        , viewFilterForm model.filter
         , div [ Style.container ]
             [ h1 [] [ text "Todo list" ]
             , viewTodoList model.todos
@@ -184,27 +213,55 @@ view model =
         ]
 
 
+viewInputForm : String -> Html Msg
+viewInputForm newtodo =
+    Html.Styled.form
+        [ Style.form
+        , onSubmit (SubmitTodo newtodo)
+        ]
+        [ input
+            [ Style.form__txt
+            , type_ "text"
+            , placeholder "todo"
+            , value newtodo
+            , onInput InputTodoField
+            ]
+            []
+        , button
+            [ Style.form__btn, disabled (newtodo == "") ]
+            [ text "OK" ]
+        ]
+
+
+viewFilterForm : Maybe Bool -> Html Msg
+viewFilterForm filter =
+    div []
+        [ button
+            [ Style.form__btn, onClick ToggleFilter ]
+            [ text "Filter" ]
+        , case filter of
+            Just filterVal ->
+                div []
+                    [ label [ for "filter" ] [ text "Done" ]
+                    , input
+                        [ id "filter"
+                        , type_ "checkbox"
+                        , checked filterVal
+                        , onClick ToggleFilterVal
+                        ]
+                        []
+                    ]
+
+            Nothing ->
+                text ""
+        ]
+
+
 viewHeader : Model -> Html Msg
 viewHeader model =
     div [ Style.nav ]
         [ div [ Style.nav__container ]
             [ div [ Style.nav__title ] [ text "Todo App" ]
-            , Html.Styled.form
-                [ Style.form
-                , onSubmit (SubmitTodo model.newtodo)
-                ]
-                [ input
-                    [ Style.form__txt
-                    , type_ "text"
-                    , placeholder "todo"
-                    , value model.newtodo
-                    , onInput InputTodoField
-                    ]
-                    []
-                , button
-                    [ Style.form__btn, disabled (model.newtodo == "") ]
-                    [ text "OK" ]
-                ]
             ]
         ]
 

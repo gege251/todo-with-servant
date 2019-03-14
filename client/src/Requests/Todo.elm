@@ -4,6 +4,7 @@ import Http
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode
+import Maybe.Extra
 import String
 import Url.Builder
 
@@ -48,8 +49,8 @@ encodeNewTodo x =
         ]
 
 
-getTodo : (Result Http.Error (List Todo) -> msg) -> Cmd msg
-getTodo toMsg =
+getTodo : (Result Http.Error (List Todo) -> msg) -> Maybe Bool -> Cmd msg
+getTodo toMsg query_filter =
     Http.request
         { method =
             "GET"
@@ -59,7 +60,20 @@ getTodo toMsg =
             Url.Builder.crossOrigin "http://localhost:3030"
                 [ "todo"
                 ]
-                []
+                (List.concat
+                    [ query_filter
+                        |> Maybe.Extra.toList
+                        |> List.map
+                            (\v ->
+                                if v then
+                                    "True"
+
+                                else
+                                    "False"
+                            )
+                        |> List.map (Url.Builder.string "filter")
+                    ]
+                )
         , body =
             Http.emptyBody
         , expect =
