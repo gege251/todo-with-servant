@@ -1,29 +1,16 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleContexts  #-}
 
 module Config where
 
-import           Servant                        ( Handler )
-import           Control.Monad.Reader           ( ReaderT
-                                                , asks
+import           Protolude
+import           Database.PostgreSQL.Typed      ( PGConnection
+                                                , PGDatabase(..)
+                                                , defaultPGDatabase
                                                 )
-import           Control.Monad.IO.Class         ( liftIO )
-import           Data.ByteString                ( ByteString )
-import           Data.Pool                      ( Pool )
-import           Data.Text                      ( Text )
 import           Data.Version                   ( Version
                                                 , makeVersion
                                                 )
-import           Database.Persist.Sql           ( SqlBackend )
 import           Network.Wai.Middleware.Cors    ( Origin )
-import           Database.Persist.Sqlite        ( runSqlPool )
-
-
-newtype Config =
-  Config { dbpool :: Pool SqlBackend }
-
-type AppM =
-  ReaderT Config Handler
 
 
 feHost :: Origin
@@ -42,20 +29,10 @@ defaultPort :: Int
 defaultPort = 3030
 
 
-sqlConnection :: Text
-sqlConnection = "test.sqlite"
-
-
 corsMethods :: [ByteString]
 corsMethods = ["GET", "PUT", "DELETE", "OPTIONS"]
 
 
-getPool :: AppM (Pool SqlBackend)
-getPool = asks dbpool
-
-
-runDB :: ReaderT SqlBackend IO a -> AppM a
-runDB action = do
-  pool <- getPool
-  liftIO $ runSqlPool action pool
-
+pgConfig :: PGDatabase
+pgConfig =
+  defaultPGDatabase { pgDBName = "gergo", pgDBUser = "postgres", pgDBPass = "" }

@@ -4,9 +4,11 @@
 
 module App where
 
+import           Protolude               hiding ( hPutStrLn )
 import           System.IO                      ( hPutStrLn
                                                 , stderr
                                                 )
+import           Control.Exception              ( finally )
 import           System.Environment             ( lookupEnv )
 import           Data.Maybe                     ( maybe )
 import           Network.Wai.Middleware.Cors    ( simpleCorsResourcePolicy
@@ -28,17 +30,12 @@ import           Api                            ( todoApi
                                                 )
 import           Control.Monad.Reader           ( runReaderT )
 import           Control.Monad.Logger           ( runStdoutLoggingT )
-import           Database.Persist.Sqlite        ( createSqlitePool
-                                                , runSqlPersistMPool
-                                                , runMigration
+import           Database.PostgreSQL.Typed      ( defaultPGDatabase
+                                                , pgConnect
+                                                , pgDisconnect
                                                 )
-import           Servant.Server
-import           Config                         ( AppM
-                                                , Config(Config)
-                                                )
-import qualified Config                        as Config
-
-import           Models.DbModel                 ( migrateAll )
+import           Servant.Server                 ( serve )
+import qualified Config
 
 
 -- APP
@@ -46,31 +43,25 @@ import           Models.DbModel                 ( migrateAll )
 
 run :: IO ()
 run = do
-    envPort <- lookupEnv "PORT"
-    pool    <- runStdoutLoggingT $ createSqlitePool Config.sqlConnection 10
-    runSqlPersistMPool (runMigration migrateAll) pool
-    let config = Config pool
-    let port     = maybe Config.defaultPort read envPort :: Int
-        settings = setPort port $ setBeforeMainLoop
-            (hPutStrLn stderr ("listening on port " ++ show port))
-            defaultSettings
-    runSettings settings =<< mkApp config
+  envPort      <- lookupEnv "PORT"
+  pgConnection <- pgConnect Config.pgConfig
 
+  let parsedPort = envPort >>= \p -> readMaybe p :: Maybe Int
 
-appToHandler :: Config -> AppM a -> Handler a
-appToHandler conf app = runReaderT app conf
+  let port     = fromMaybe Config.defaultPort parsedPort
 
+      settings = setPort port $ setBeforeMainLoop
+        (hPutStrLn stderr ("listening on port " <> show port))
+        defaultSettings
 
-mkApp :: Config -> IO Application
-mkApp config =
-    return $ cors (const $ Just policy) $ serve todoApi $ hoistServer
-        todoApi
-        (appToHandler config)
-        server
-  where
-    policy = simpleCorsResourcePolicy
+      policy = simpleCorsResourcePolicy
         { corsOrigins        = Just ([Config.feHost], False)
         , corsMethods        = Config.corsMethods
         , corsRequestHeaders = ["content-type"]
         }
 
+  let application =
+        cors (const $ Just policy) $ serve todoApi $ server pgConnection
+
+
+  runSettings settings application `finally` pgDisconnect pgConnection

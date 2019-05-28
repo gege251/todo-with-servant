@@ -45,9 +45,15 @@ executables:
     dependencies:
       - servant-persistent-todoapi
 
+default-extensions:
+  - NoImplicitPrelude
+  - OverloadedStrings
+
 dependencies:
+  - protolude >= 0.2 && < 1
   - aeson
   - base
+  - text
   - elm-export
   - servant
   - servant-server <= 0.13
@@ -58,12 +64,10 @@ dependencies:
   - wai
   - wai-cors
   - warp
-  - text
-  - bytestring
-  - persistent
-  - persistent-sqlite
+  - postgresql-typed
   - persistent-template
   - resource-pool
   - mtl
   - monad-logger
   - unliftio-core
+  - uuid

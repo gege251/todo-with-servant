@@ -1,67 +1,64 @@
 {-# LANGUAGE ScopedTypeVariables      #-}
 {-# LANGUAGE DuplicateRecordFields      #-}
+{-# LANGUAGE QuasiQuotes      #-}
+{-# LANGUAGE DataKinds             #-}
+{-# LANGUAGE RankNTypes             #-}
+{-# LANGUAGE FlexibleContexts  #-}
 
 module TodoActions where
 
+import           Protolude
 import           GHC.Int                        ( Int64 )
 import           Data.Maybe                     ( maybeToList )
-import           Database.Persist               ( Entity(Entity)
-                                                , (==.)
+
+import           Database.PostgreSQL.Typed.Query
+                                                ( PGQuery )
+import           Database.PostgreSQL.Typed      ( pgSQL )
+
+import           Servant                        ( NoContent(NoContent)
+                                                , Handler
                                                 )
 
-import           Database.Persist.Sqlite        ( toSqlKey
-                                                , fromSqlKey
-                                                , selectList
-                                                , selectFirst
-                                                , deleteWhere
-                                                , insert
-                                                , replace
-                                                )
-
-import           Servant                        ( NoContent(NoContent) )
-
-import qualified Models.DbModel                as Db
 import qualified Models.ApiModel               as Api
-import           Config                         ( AppM
-                                                , runDB
-                                                )
 
 
-toApiModel :: Entity Db.Todo -> Api.Todo
-toApiModel (Entity key todo) =
-  Api.Todo (fromSqlKey key) (Db.todoValue todo) (Db.todoDone todo)
+type DBQuery q a = PGQuery q a => q -> IO a
+
+-- type DBExec q = PGQuery q () => q -> IO Int
+
+toTodo :: (Text, Text, Bool) -> Api.Todo
+toTodo (id, value, done) = Api.Todo id value done
 
 
-getTodos :: Maybe Bool -> AppM [Api.Todo]
-getTodos maybeFilter = do
-  let filters = (==.) Db.TodoDone <$> maybeToList maybeFilter
-  todos :: [Entity Db.Todo] <- runDB $ selectList filters []
-  return $ map toApiModel todos
+-- getTodos :: DBQuery (Text, Text, Bool) -> Maybe Bool -> Handler [Api.Todo]
+getTodos dbQuery maybeFilter = do
+  -- let filters = (==.) Api.TodoDone <$> maybeToList maybeFilter
+  todos <- liftIO $ dbQuery [pgSQL|SELECT id, value, done FROM todo |]
+  pure $ map toTodo todos
 
 
-getTodoById :: Int64 -> AppM (Maybe Api.Todo)
-getTodoById todoId = do
-  todo <- runDB $ selectFirst [Db.TodoId ==. (toSqlKey todoId)] []
-  return $ fmap toApiModel todo
+-- getTodoById :: DBQuery -> Int64 -> Handler (Maybe Api.Todo)
+-- getTodoById dbQuery todoId = do
+--   todo <- runDB $ selectFirst [Api.TodoId ==. (toSqlKey todoId)] []
+--   return $ fmap toApiModel todo
 
 
-putTodo :: Api.NewTodo -> AppM Api.Todo
-putTodo todoVal = do
-  let newTodo = Db.Todo (Api.value (todoVal :: Api.NewTodo)) False
-  todoKey <- runDB $ insert newTodo
-  return
-    $ Api.Todo (fromSqlKey todoKey) (Api.value (todoVal :: Api.NewTodo)) False
+-- putTodo :: DBExec -> Api.NewTodo -> Handler Api.Todo
+-- putTodo dbExec todoVal = do
+--   let newTodo = Api.Todo (Api.value (todoVal :: Api.NewTodo)) False
+--   todoKey <- runDB $ insert newTodo
+--   return
+--     $ Api.Todo (fromSqlKey todoKey) (Api.value (todoVal :: Api.NewTodo)) False
 
 
-delTodo :: Int64 -> AppM NoContent
-delTodo todoId = do
-  runDB $ deleteWhere [Db.TodoId ==. (toSqlKey todoId)]
-  return NoContent
+-- delTodo :: DBExec -> Int64 -> Handler NoContent
+-- delTodo dbExec todoId = do
+--   runDB $ deleteWhere [Api.TodoId ==. (toSqlKey todoId)]
+--   return NoContent
 
 
-updateTodo :: Int64 -> Api.Todo -> AppM NoContent
-updateTodo todoId todo = do
-  let dbTodo = Db.Todo (Api.value (todo :: Api.Todo)) (Api.done todo)
-  runDB $ replace (toSqlKey todoId :: Db.TodoId) dbTodo
-  return NoContent
-
+-- updateTodo :: DBExec -> Int64 -> Api.Todo -> Handler NoContent
+-- updateTodo dbExec todoId todo = do
+--   let dbTodo = Api.Todo (Api.value (todo :: Api.Todo)) (Api.done todo)
+--   runDB $ replace (toSqlKey todoId :: Api.TodoId) dbTodo
+--   return NoContent

@@ -3,8 +3,10 @@
 
 module Models.ApiModel where
 
+import           Protolude
 import           GHC.Int                        ( Int64 )
-import           Data.Text                      ( Text )
+import           Data.UUID.V1                   ( nextUUID )
+import qualified Data.UUID                     as UUID
 import           GHC.Generics                   ( Generic )
 import           Data.Aeson                     ( FromJSON
                                                 , ToJSON
@@ -15,7 +17,7 @@ import           Servant.Elm                    ( ElmType )
 -- TODO
 
 data Todo = Todo
-  { id :: Int64
+  { id :: Text
   , value :: Text
   , done :: Bool
   } deriving (Eq, Show, Generic)
@@ -32,3 +34,11 @@ newtype NewTodo = NewTodo
 instance FromJSON NewTodo
 instance ToJSON NewTodo
 instance ElmType NewTodo
+
+
+createTodo :: NewTodo -> IO (Maybe Todo)
+createTodo (NewTodo val) = do
+  uuid <- nextUUID
+  let uuidText = fmap UUID.toText uuid
+
+  pure $ Todo <$> uuidText <*> Just val <*> Just False

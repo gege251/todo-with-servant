@@ -1,8 +1,10 @@
--- This file has been generated from package.yaml by hpack version 0.28.2.
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.1.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 841d39022e8c63a4686ae62a5e537db4ae9f805ca19d969411d859f91f5c82ba
+-- hash: 38ab546e469022af768f47a742f7dc213a5ceb7a5fb42cbc5d0972c38aeb6c0e
 
 name:           servant-persistent-todoapi
 version:        0.1.0.0
@@ -13,7 +15,6 @@ author:         Szabo Gergely
 copyright:      2018 Szabo Gergely
 license:        BSD3
 build-type:     Simple
-cabal-version:  >= 1.10
 
 source-repository head
   type: git
@@ -22,17 +23,17 @@ source-repository head
 library
   hs-source-dirs:
       src
+  default-extensions: NoImplicitPrelude OverloadedStrings
   ghc-options: -Wall
   build-depends:
       aeson
     , base
-    , bytestring
     , elm-export
     , monad-logger
     , mtl
-    , persistent
-    , persistent-sqlite
     , persistent-template
+    , postgresql-typed
+    , protolude >=0.2 && <1
     , resource-pool
     , servant
     , servant-docs
@@ -41,6 +42,7 @@ library
     , text
     , transformers
     , unliftio-core
+    , uuid
     , wai
     , wai-cors
     , warp
@@ -51,9 +53,7 @@ library
       CodeGens.Elm
       Config
       Models.ApiModel
-      Models.DbModel
       TodoActions
-      Utils
   other-modules:
       Paths_servant_persistent_todoapi
   default-language: Haskell2010
@@ -64,17 +64,17 @@ executable todoapi
       Paths_servant_persistent_todoapi
   hs-source-dirs:
       exe/TodoApi
+  default-extensions: NoImplicitPrelude OverloadedStrings
   ghc-options: -Wall
   build-depends:
       aeson
     , base
-    , bytestring
     , elm-export
     , monad-logger
     , mtl
-    , persistent
-    , persistent-sqlite
     , persistent-template
+    , postgresql-typed
+    , protolude >=0.2 && <1
     , resource-pool
     , servant
     , servant-docs
@@ -84,6 +84,7 @@ executable todoapi
     , text
     , transformers
     , unliftio-core
+    , uuid
     , wai
     , wai-cors
     , warp
@@ -95,17 +96,17 @@ executable todoapi-gen-docs
       Paths_servant_persistent_todoapi
   hs-source-dirs:
       exe/GenerateDocs
+  default-extensions: NoImplicitPrelude OverloadedStrings
   ghc-options: -Wall
   build-depends:
       aeson
     , base
-    , bytestring
     , elm-export
     , monad-logger
     , mtl
-    , persistent
-    , persistent-sqlite
     , persistent-template
+    , postgresql-typed
+    , protolude >=0.2 && <1
     , resource-pool
     , servant
     , servant-docs
@@ -115,6 +116,7 @@ executable todoapi-gen-docs
     , text
     , transformers
     , unliftio-core
+    , uuid
     , wai
     , wai-cors
     , warp
@@ -126,17 +128,17 @@ executable todoapi-gen-elm
       Paths_servant_persistent_todoapi
   hs-source-dirs:
       exe/GenerateElm
+  default-extensions: NoImplicitPrelude OverloadedStrings
   ghc-options: -Wall
   build-depends:
       aeson
     , base
-    , bytestring
     , elm-export
     , monad-logger
     , mtl
-    , persistent
-    , persistent-sqlite
     , persistent-template
+    , postgresql-typed
+    , protolude >=0.2 && <1
     , resource-pool
     , servant
     , servant-docs
@@ -146,6 +148,7 @@ executable todoapi-gen-elm
     , text
     , transformers
     , unliftio-core
+    , uuid
     , wai
     , wai-cors
     , warp
@@ -156,20 +159,20 @@ test-suite spec
   main-is: Spec.hs
   hs-source-dirs:
       test
+  default-extensions: NoImplicitPrelude OverloadedStrings
   ghc-options: -Wall
   build-depends:
       aeson
     , base
-    , bytestring
     , elm-export
     , hspec
     , http-client
     , http-types
     , monad-logger
     , mtl
-    , persistent
-    , persistent-sqlite
     , persistent-template
+    , postgresql-typed
+    , protolude >=0.2 && <1
     , resource-pool
     , servant
     , servant-client
@@ -180,6 +183,7 @@ test-suite spec
     , text
     , transformers
     , unliftio-core
+    , uuid
     , wai
     , wai-cors
     , warp

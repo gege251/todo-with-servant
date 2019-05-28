@@ -1,14 +1,10 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators     #-}
 {-# LANGUAGE DataKinds         #-}
 
 module CodeGens.Elm where
 
-import           Data.Text                      ( Text
-                                                , pack
-                                                , unpack
-                                                , intercalate
-                                                )
+import           Protolude               hiding ( intercalate )
+import           Data.Text                      ( intercalate )
 import           Data.Monoid                    ( (<>) )
 import           Elm                            ( toElmDecoderSource
                                                 , toElmEncoderSource
@@ -28,15 +24,15 @@ import           Models.ApiModel                ( Todo
 import           Api                            ( TodoApi )
 
 
-elmPath :: String
+elmPath :: FilePath
 elmPath = "../client/src/Requests/Todo.elm"
 
 options :: ElmOptions
 options = defElmOptions { urlPrefix = Static "http://localhost:3030" }
 
-elmHeader :: String -> Text
+elmHeader :: Text -> Text
 elmHeader moduleName =
-  "module " <> pack moduleName <> " exposing (..)\n\n" <> defElmImports
+  "module " <> moduleName <> " exposing (..)\n\n" <> defElmImports
 
 
 elmfile :: [Text]
@@ -54,5 +50,5 @@ elmfile =
 
 generate :: IO ()
 generate = do
-  putStrLn $ "Writing Elm queries functions to " ++ elmPath
-  writeFile elmPath $ (unpack . intercalate (pack "\n\n\n")) elmfile
+  putStrLn $ "Writing Elm queries functions to " <> elmPath
+  writeFile elmPath $ intercalate "\n\n\n" elmfile
