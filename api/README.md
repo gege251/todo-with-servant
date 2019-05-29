@@ -10,7 +10,7 @@ API version: 1.0.0
 
 ### GET Parameters:
 
-- filter
+- done
      - **Values**: **
      - **Description**: Filter by done state
 
@@ -34,13 +34,13 @@ API version: 1.0.0
 - Example (`application/json;charset=utf-8`, `application/json`):
 
     ```javascript
-[{"done":false,"value":"buy me a beer","id":0}]
+[{"done":false,"value":"buy me a beer","id":"uuid-1234"}]
     ```
 
 - Example (`application/json;charset=utf-8`):
 
     ```javascript
-[{"done":false,"value":"buy me a beer","id":0},{"done":false,"value":"buy me a beer","id":0}]
+[{"done":false,"value":"buy me a beer","id":"uuid-1234"},{"done":false,"value":"buy me a beer","id":"uuid-1234"}]
     ```
 
 ## POST /todo
@@ -71,14 +71,20 @@ API version: 1.0.0
 - Example (`application/json;charset=utf-8`, `application/json`):
 
     ```javascript
-{"done":false,"value":"buy me a beer","id":0}
+null
+    ```
+
+- Example (`application/json;charset=utf-8`, `application/json`):
+
+    ```javascript
+{"done":false,"value":"buy me a beer","id":"uuid-1234"}
     ```
 
 ## DELETE /todo/:todoId
 
 ### Captures:
 
-- *todoId*: (integer) Todo ID
+- *todoId*: (string) Todo ID
 
 ### Response:
 
@@ -100,7 +106,7 @@ API version: 1.0.0
 
 ### Captures:
 
-- *todoId*: (integer) Todo ID
+- *todoId*: (string) Todo ID
 
 ### Response:
 
@@ -121,14 +127,14 @@ null
 - Example (`application/json;charset=utf-8`, `application/json`):
 
     ```javascript
-{"done":false,"value":"buy me a beer","id":0}
+{"done":false,"value":"buy me a beer","id":"uuid-1234"}
     ```
 
 ## PUT /todo/:todoId
 
 ### Captures:
 
-- *todoId*: (integer) Todo ID
+- *todoId*: (string) Todo ID
 
 ### Request:
 
@@ -140,7 +146,7 @@ null
 - Example (`application/json;charset=utf-8`, `application/json`):
 
     ```javascript
-{"done":false,"value":"buy me a beer","id":0}
+{"done":false,"value":"buy me a beer","id":"uuid-1234"}
     ```
 
 ### Response:
