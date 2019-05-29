@@ -1,6 +1,3 @@
-{-# LANGUAGE TypeOperators     #-}
-{-# LANGUAGE DataKinds         #-}
-
 module CodeGens.Elm where
 
 import           Protolude               hiding ( intercalate )
@@ -18,7 +15,7 @@ import           Servant.Elm                    ( Proxy(Proxy)
                                                 , urlPrefix
                                                 , generateElmForAPIWith
                                                 )
-import           Models.ApiModel                ( Todo
+import           Model.Todo                     ( Todo
                                                 , NewTodo
                                                 )
 import           Api                            ( TodoApi )
@@ -31,8 +28,8 @@ options :: ElmOptions
 options = defElmOptions { urlPrefix = Static "http://localhost:3030" }
 
 elmHeader :: Text -> Text
-elmHeader moduleName =
-  "module " <> moduleName <> " exposing (..)\n\n" <> defElmImports
+elmHeader elmModule =
+  "module " <> elmModule <> " exposing (..)\n\n" <> defElmImports
 
 
 elmfile :: [Text]

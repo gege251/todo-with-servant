@@ -1,10 +1,9 @@
 {-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE DuplicateRecordFields      #-}
 
-module Models.ApiModel where
+module Model.Todo where
 
 import           Protolude
-import           GHC.Int                        ( Int64 )
 import           Data.UUID.V1                   ( nextUUID )
 import qualified Data.UUID                     as UUID
 import           GHC.Generics                   ( Generic )

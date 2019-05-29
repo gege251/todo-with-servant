@@ -1,7 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeOperators     #-}
-{-# LANGUAGE DataKinds         #-}
-
 module App where
 
 import           Protolude               hiding ( hPutStrLn )
@@ -10,7 +6,6 @@ import           System.IO                      ( hPutStrLn
                                                 )
 import           Control.Exception              ( finally )
 import           System.Environment             ( lookupEnv )
-import           Data.Maybe                     ( maybe )
 import           Network.Wai.Middleware.Cors    ( simpleCorsResourcePolicy
                                                 , cors
                                                 , corsMethods
@@ -28,10 +23,7 @@ import           Network.Wai.Handler.Warp       ( defaultSettings
 import           Api                            ( todoApi
                                                 , server
                                                 )
-import           Control.Monad.Reader           ( runReaderT )
-import           Control.Monad.Logger           ( runStdoutLoggingT )
-import           Database.PostgreSQL.Typed      ( defaultPGDatabase
-                                                , pgConnect
+import           Database.PostgreSQL.Typed      ( pgConnect
                                                 , pgDisconnect
                                                 )
 import           Servant.Server                 ( serve )

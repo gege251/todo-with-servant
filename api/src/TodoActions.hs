@@ -1,64 +1,70 @@
-{-# LANGUAGE ScopedTypeVariables      #-}
-{-# LANGUAGE DuplicateRecordFields      #-}
-{-# LANGUAGE QuasiQuotes      #-}
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE RankNTypes             #-}
-{-# LANGUAGE FlexibleContexts  #-}
-
 module TodoActions where
 
 import           Protolude
-import           GHC.Int                        ( Int64 )
-import           Data.Maybe                     ( maybeToList )
-
-import           Database.PostgreSQL.Typed.Query
-                                                ( PGQuery )
-import           Database.PostgreSQL.Typed      ( pgSQL )
+import           Database.PostgreSQL.Typed.Query ( PGSimpleQuery  )
+import           Database.PostgreSQL.Typed      ( pgSQL  )
 
 import           Servant                        ( NoContent(NoContent)
                                                 , Handler
                                                 )
 
-import qualified Models.ApiModel               as Api
+import           Model.Todo
 
 
-type DBQuery q a = PGQuery q a => q -> IO a
-
--- type DBExec q = PGQuery q () => q -> IO Int
-
-toTodo :: (Text, Text, Bool) -> Api.Todo
-toTodo (id, value, done) = Api.Todo id value done
+type DBQuery a = PGSimpleQuery a -> IO [a]
 
 
--- getTodos :: DBQuery (Text, Text, Bool) -> Maybe Bool -> Handler [Api.Todo]
+type DBExec = PGSimpleQuery () -> IO Int
+
+
+toTodo :: (Text, Text, Bool) -> Todo
+toTodo (todoId, todoValue, todoDone) = Todo todoId todoValue todoDone
+
+
+getTodos :: DBQuery (Text, Text, Bool) -> Maybe Bool -> Handler [Todo]
 getTodos dbQuery maybeFilter = do
-  -- let filters = (==.) Api.TodoDone <$> maybeToList maybeFilter
-  todos <- liftIO $ dbQuery [pgSQL|SELECT id, value, done FROM todo |]
+  let query = case maybeFilter of
+        Nothing -> 
+          [pgSQL|SELECT id, value, done FROM todo|]
+        Just todoDone ->
+          [pgSQL|SELECT id, value, done FROM todo WHERE done = ${todoDone}|]
+
+  todos <- liftIO $ dbQuery query
   pure $ map toTodo todos
 
 
--- getTodoById :: DBQuery -> Int64 -> Handler (Maybe Api.Todo)
--- getTodoById dbQuery todoId = do
---   todo <- runDB $ selectFirst [Api.TodoId ==. (toSqlKey todoId)] []
---   return $ fmap toApiModel todo
+getTodoById :: DBQuery (Text, Text, Bool) -> Text -> Handler (Maybe Todo)
+getTodoById dbQuery todoId = do
+  todos <- liftIO $ dbQuery [pgSQL|SELECT id, value, done FROM todo WHERE id = ${todoId}|]
+  pure $ (map toTodo . listToMaybe) todos
 
 
--- putTodo :: DBExec -> Api.NewTodo -> Handler Api.Todo
--- putTodo dbExec todoVal = do
---   let newTodo = Api.Todo (Api.value (todoVal :: Api.NewTodo)) False
---   todoKey <- runDB $ insert newTodo
---   return
---     $ Api.Todo (fromSqlKey todoKey) (Api.value (todoVal :: Api.NewTodo)) False
+putTodo :: DBExec -> NewTodo -> Handler (Maybe Todo)
+putTodo dbExec todoVal = do
+  maybeNewTodo <- liftIO $ createTodo todoVal
+  case maybeNewTodo of
+    Nothing -> pure Nothing
+    Just newTodo@(Todo todoId todoValue todoDone) -> do
+        _ <- liftIO $ dbExec
+            [pgSQL|
+                INSERT INTO todo (id, value, done)
+                VALUES (${todoId}, ${todoValue}, ${todoDone})
+            |]
+        pure $ Just newTodo
 
 
--- delTodo :: DBExec -> Int64 -> Handler NoContent
--- delTodo dbExec todoId = do
---   runDB $ deleteWhere [Api.TodoId ==. (toSqlKey todoId)]
---   return NoContent
+delTodo :: DBExec -> Text -> Handler NoContent
+delTodo dbExec todoId = do
+  _ <- liftIO $ dbExec [pgSQL|DELETE FROM todo WHERE id = ${todoId}|]
+  pure NoContent
 
 
--- updateTodo :: DBExec -> Int64 -> Api.Todo -> Handler NoContent
--- updateTodo dbExec todoId todo = do
---   let dbTodo = Api.Todo (Api.value (todo :: Api.Todo)) (Api.done todo)
---   runDB $ replace (toSqlKey todoId :: Api.TodoId) dbTodo
---   return NoContent
+updateTodo :: DBExec -> Text -> Todo -> Handler NoContent
+updateTodo dbExec todoId (Todo _ todoValue todoDone) = do
+  _ <- liftIO $ dbExec 
+    [pgSQL|
+		UPDATE todo
+		SET value=${todoValue}, done=${todoDone}
+		WHERE id = ${todoId}
+	|]
+  pure NoContent

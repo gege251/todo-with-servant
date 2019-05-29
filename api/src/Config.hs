@@ -1,10 +1,7 @@
-{-# LANGUAGE FlexibleContexts  #-}
-
 module Config where
 
 import           Protolude
-import           Database.PostgreSQL.Typed      ( PGConnection
-                                                , PGDatabase(..)
+import           Database.PostgreSQL.Typed      ( PGDatabase(..)
                                                 , defaultPGDatabase
                                                 )
 import           Data.Version                   ( Version

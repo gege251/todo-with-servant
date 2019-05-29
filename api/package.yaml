@@ -7,7 +7,7 @@ copyright: "2018 Szabo Gergely"
 
 description: Please see the README on Github at <https://github.com/gege251/servant-persitent-todoapi#readme>
 
-ghc-options: -Wall
+ghc-options: -Wall -fno-warn-orphans
 
 tests:
   spec:
@@ -48,6 +48,15 @@ executables:
 default-extensions:
   - NoImplicitPrelude
   - OverloadedStrings
+  - DataKinds
+  - ScopedTypeVariables
+  - DuplicateRecordFields
+  - QuasiQuotes
+  - RankNTypes
+  - FlexibleContexts
+  - FlexibleInstances
+  - TypeOperators
+  - TypeFamilies
 
 dependencies:
   - protolude >= 0.2 && < 1
@@ -67,7 +76,5 @@ dependencies:
   - postgresql-typed
   - persistent-template
   - resource-pool
-  - mtl
   - monad-logger
-  - unliftio-core
   - uuid

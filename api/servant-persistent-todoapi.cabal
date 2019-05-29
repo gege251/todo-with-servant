@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 38ab546e469022af768f47a742f7dc213a5ceb7a5fb42cbc5d0972c38aeb6c0e
+-- hash: 4aa56e132e8bf8fb12a3eff105b66a1577c67769bc9bfcaea28c70ebf09f5586
 
 name:           servant-persistent-todoapi
 version:        0.1.0.0
@@ -23,14 +23,13 @@ source-repository head
 library
   hs-source-dirs:
       src
-  default-extensions: NoImplicitPrelude OverloadedStrings
-  ghc-options: -Wall
+  default-extensions: NoImplicitPrelude OverloadedStrings DataKinds ScopedTypeVariables DuplicateRecordFields QuasiQuotes RankNTypes FlexibleContexts FlexibleInstances TypeOperators TypeFamilies
+  ghc-options: -Wall -fno-warn-orphans
   build-depends:
       aeson
     , base
     , elm-export
     , monad-logger
-    , mtl
     , persistent-template
     , postgresql-typed
     , protolude >=0.2 && <1
@@ -41,7 +40,6 @@ library
     , servant-server <=0.13
     , text
     , transformers
-    , unliftio-core
     , uuid
     , wai
     , wai-cors
@@ -52,7 +50,7 @@ library
       CodeGens.Docs
       CodeGens.Elm
       Config
-      Models.ApiModel
+      Model.Todo
       TodoActions
   other-modules:
       Paths_servant_persistent_todoapi
@@ -64,14 +62,13 @@ executable todoapi
       Paths_servant_persistent_todoapi
   hs-source-dirs:
       exe/TodoApi
-  default-extensions: NoImplicitPrelude OverloadedStrings
-  ghc-options: -Wall
+  default-extensions: NoImplicitPrelude OverloadedStrings DataKinds ScopedTypeVariables DuplicateRecordFields QuasiQuotes RankNTypes FlexibleContexts FlexibleInstances TypeOperators TypeFamilies
+  ghc-options: -Wall -fno-warn-orphans
   build-depends:
       aeson
     , base
     , elm-export
     , monad-logger
-    , mtl
     , persistent-template
     , postgresql-typed
     , protolude >=0.2 && <1
@@ -83,7 +80,6 @@ executable todoapi
     , servant-server <=0.13
     , text
     , transformers
-    , unliftio-core
     , uuid
     , wai
     , wai-cors
@@ -96,14 +92,13 @@ executable todoapi-gen-docs
       Paths_servant_persistent_todoapi
   hs-source-dirs:
       exe/GenerateDocs
-  default-extensions: NoImplicitPrelude OverloadedStrings
-  ghc-options: -Wall
+  default-extensions: NoImplicitPrelude OverloadedStrings DataKinds ScopedTypeVariables DuplicateRecordFields QuasiQuotes RankNTypes FlexibleContexts FlexibleInstances TypeOperators TypeFamilies
+  ghc-options: -Wall -fno-warn-orphans
   build-depends:
       aeson
     , base
     , elm-export
     , monad-logger
-    , mtl
     , persistent-template
     , postgresql-typed
     , protolude >=0.2 && <1
@@ -115,7 +110,6 @@ executable todoapi-gen-docs
     , servant-server <=0.13
     , text
     , transformers
-    , unliftio-core
     , uuid
     , wai
     , wai-cors
@@ -128,14 +122,13 @@ executable todoapi-gen-elm
       Paths_servant_persistent_todoapi
   hs-source-dirs:
       exe/GenerateElm
-  default-extensions: NoImplicitPrelude OverloadedStrings
-  ghc-options: -Wall
+  default-extensions: NoImplicitPrelude OverloadedStrings DataKinds ScopedTypeVariables DuplicateRecordFields QuasiQuotes RankNTypes FlexibleContexts FlexibleInstances TypeOperators TypeFamilies
+  ghc-options: -Wall -fno-warn-orphans
   build-depends:
       aeson
     , base
     , elm-export
     , monad-logger
-    , mtl
     , persistent-template
     , postgresql-typed
     , protolude >=0.2 && <1
@@ -147,7 +140,6 @@ executable todoapi-gen-elm
     , servant-server <=0.13
     , text
     , transformers
-    , unliftio-core
     , uuid
     , wai
     , wai-cors
@@ -159,8 +151,8 @@ test-suite spec
   main-is: Spec.hs
   hs-source-dirs:
       test
-  default-extensions: NoImplicitPrelude OverloadedStrings
-  ghc-options: -Wall
+  default-extensions: NoImplicitPrelude OverloadedStrings DataKinds ScopedTypeVariables DuplicateRecordFields QuasiQuotes RankNTypes FlexibleContexts FlexibleInstances TypeOperators TypeFamilies
+  ghc-options: -Wall -fno-warn-orphans
   build-depends:
       aeson
     , base
@@ -169,7 +161,6 @@ test-suite spec
     , http-client
     , http-types
     , monad-logger
-    , mtl
     , persistent-template
     , postgresql-typed
     , protolude >=0.2 && <1
@@ -182,7 +173,6 @@ test-suite spec
     , servant-server <=0.13
     , text
     , transformers
-    , unliftio-core
     , uuid
     , wai
     , wai-cors

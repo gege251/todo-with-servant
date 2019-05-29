@@ -1,6 +1,3 @@
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE TypeOperators         #-}
-
 module CodeGens.Docs where
 
 import           Protolude

@@ -1,12 +1,3 @@
-{-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeOperators         #-}
-{-# LANGUAGE TypeFamilies          #-}
-{-# OPTIONS_GHC -fno-warn-orphans  #-}
-
-
 module Api where
 
 import           Protolude
@@ -18,7 +9,7 @@ import           Database.PostgreSQL.Typed      ( PGConnection
                                                 , pgExecute
                                                 )
 
-import           Models.ApiModel
+import           Model.Todo
 import qualified TodoActions
 
 
@@ -27,19 +18,19 @@ import qualified TodoActions
 
 type TodoApi =
   -- GET /todo Returns every todo
-  "todo" :> QueryParam "filter" Bool :> Get '[JSON] [Todo] -- :<|>
+       "todo" :> QueryParam "done" Bool :> Get '[JSON] [Todo]
 
-  -- -- GET /todo/:todoId Returns the todo with the given ID
-  -- "todo" :> Capture "todoId" Int64 :> Get '[JSON] (Maybe Todo) :<|>
+  -- GET /todo/:todoId Returns the todo with the given ID
+  :<|> "todo" :> Capture "todoId" Text :> Get '[JSON] (Maybe Todo)
 
-  -- -- POST /todo Creates a new todo
-  -- "todo" :> ReqBody '[JSON] NewTodo :> PostCreated '[JSON] Todo :<|>
+  -- POST /todo Creates a new todo
+  :<|> "todo" :> ReqBody '[JSON] NewTodo :> PostCreated '[JSON] (Maybe Todo)
 
-  -- -- DELETE /todo/:todoid Deletes todo with the given ID
-  -- "todo" :> Capture "todoId" Int64 :> DeleteAccepted '[JSON] NoContent :<|>
+  -- DELETE /todo/:todoid Deletes todo with the given ID
+  :<|> "todo" :> Capture "todoId" Text :> DeleteAccepted '[JSON] NoContent
 
-  -- -- PUT /todo/:todoid Replaces todo of the given ID
-  -- "todo" :> Capture "todoId" Int64 :> ReqBody '[JSON] Todo :> PutAccepted '[JSON] NoContent
+  -- PUT /todo/:todoid Replaces todo of the given ID
+  :<|> "todo" :> Capture "todoId" Text :> ReqBody '[JSON] Todo :> PutAccepted '[JSON] NoContent
 
 
 todoApi :: Proxy TodoApi
@@ -49,21 +40,21 @@ todoApi = Proxy
 server :: PGConnection -> ServerT TodoApi Handler
 server pgConnection =
   let dbQuery = pgQuery pgConnection
-      -- dbExec  = pgExecute pgConnection
-                                     in TodoActions.getTodos dbQuery
-      -- :<|> TodoActions.getTodoById dbQuery
-      -- :<|> TodoActions.putTodo dbExec
-      -- :<|> TodoActions.delTodo dbExec
-      -- :<|> TodoActions.updateTodo dbExec
+      dbExec  = pgExecute pgConnection
+  in  TodoActions.getTodos dbQuery
+      :<|> TodoActions.getTodoById dbQuery
+      :<|> TodoActions.putTodo dbExec
+      :<|> TodoActions.delTodo dbExec
+      :<|> TodoActions.updateTodo dbExec
 
 
 -- DOCS
 
-instance ToParam (QueryParam "filter" Bool) where
-  toParam _ = DocQueryParam "filter" [] "Filter by done state" Normal
+instance ToParam (QueryParam "done" Bool) where
+  toParam _ = DocQueryParam "done" [] "Filter by done state" Normal
 
-instance ToCapture (Capture "todoId" Int64) where
-  toCapture _ = DocCapture "todoId" "(integer) Todo ID"
+instance ToCapture (Capture "todoId" Text) where
+  toCapture _ = DocCapture "todoId" "(string) Todo ID"
 
 instance ToSample Int64 where
   toSamples _ = singleSample 1
