@@ -14,7 +14,7 @@ type NoContent
 
 
 type alias Todo =
-    { id : Int
+    { id : String
     , value : String
     , done : Bool
     }
@@ -28,7 +28,7 @@ type alias NewTodo =
 decodeTodo : Decoder Todo
 decodeTodo =
     Json.Decode.succeed Todo
-        |> required "id" int
+        |> required "id" string
         |> required "value" string
         |> required "done" bool
 
@@ -36,7 +36,7 @@ decodeTodo =
 encodeTodo : Todo -> Json.Encode.Value
 encodeTodo x =
     Json.Encode.object
-        [ ( "id", Json.Encode.int x.id )
+        [ ( "id", Json.Encode.string x.id )
         , ( "value", Json.Encode.string x.value )
         , ( "done", Json.Encode.bool x.done )
         ]
@@ -50,7 +50,7 @@ encodeNewTodo x =
 
 
 getTodo : (Result Http.Error (List Todo) -> msg) -> Maybe Bool -> Cmd msg
-getTodo toMsg query_filter =
+getTodo toMsg query_done =
     Http.request
         { method =
             "GET"
@@ -61,7 +61,7 @@ getTodo toMsg query_filter =
                 [ "todo"
                 ]
                 (List.concat
-                    [ query_filter
+                    [ query_done
                         |> Maybe.Extra.toList
                         |> List.map
                             (\v ->
@@ -71,7 +71,7 @@ getTodo toMsg query_filter =
                                 else
                                     "False"
                             )
-                        |> List.map (Url.Builder.string "filter")
+                        |> List.map (Url.Builder.string "done")
                     ]
                 )
         , body =
@@ -85,7 +85,7 @@ getTodo toMsg query_filter =
         }
 
 
-getTodoByTodoId : (Result Http.Error (Maybe Todo) -> msg) -> Int -> Cmd msg
+getTodoByTodoId : (Result Http.Error (Maybe Todo) -> msg) -> String -> Cmd msg
 getTodoByTodoId toMsg capture_todoId =
     Http.request
         { method =
@@ -95,7 +95,7 @@ getTodoByTodoId toMsg capture_todoId =
         , url =
             Url.Builder.crossOrigin "http://localhost:3030"
                 [ "todo"
-                , String.fromInt <| capture_todoId
+                , capture_todoId
                 ]
                 []
         , body =
@@ -109,7 +109,7 @@ getTodoByTodoId toMsg capture_todoId =
         }
 
 
-postTodo : (Result Http.Error Todo -> msg) -> NewTodo -> Cmd msg
+postTodo : (Result Http.Error (Maybe Todo) -> msg) -> NewTodo -> Cmd msg
 postTodo toMsg body =
     Http.request
         { method =
@@ -124,7 +124,7 @@ postTodo toMsg body =
         , body =
             Http.jsonBody (encodeNewTodo body)
         , expect =
-            Http.expectJson toMsg decodeTodo
+            Http.expectJson toMsg (nullable decodeTodo)
         , timeout =
             Nothing
         , tracker =
@@ -132,7 +132,7 @@ postTodo toMsg body =
         }
 
 
-deleteTodoByTodoId : (Result Http.Error NoContent -> msg) -> Int -> Cmd msg
+deleteTodoByTodoId : (Result Http.Error NoContent -> msg) -> String -> Cmd msg
 deleteTodoByTodoId toMsg capture_todoId =
     Http.request
         { method =
@@ -142,7 +142,7 @@ deleteTodoByTodoId toMsg capture_todoId =
         , url =
             Url.Builder.crossOrigin "http://localhost:3030"
                 [ "todo"
-                , String.fromInt <| capture_todoId
+                , capture_todoId
                 ]
                 []
         , body =
@@ -164,7 +164,7 @@ deleteTodoByTodoId toMsg capture_todoId =
         }
 
 
-putTodoByTodoId : (Result Http.Error NoContent -> msg) -> Int -> Todo -> Cmd msg
+putTodoByTodoId : (Result Http.Error NoContent -> msg) -> String -> Todo -> Cmd msg
 putTodoByTodoId toMsg capture_todoId body =
     Http.request
         { method =
@@ -174,7 +174,7 @@ putTodoByTodoId toMsg capture_todoId body =
         , url =
             Url.Builder.crossOrigin "http://localhost:3030"
                 [ "todo"
-                , String.fromInt <| capture_todoId
+                , capture_todoId
                 ]
                 []
         , body =

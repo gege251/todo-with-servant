@@ -6,6 +6,7 @@ import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Html.Styled.Events exposing (onClick, onInput, onSubmit)
 import List.Extra exposing (updateIf)
+import Maybe.Extra as MaybeE
 import RemoteData exposing (WebData, toMaybe)
 import Requests.Todo as Requests
 import Style
@@ -18,14 +19,14 @@ type Msg
     | SubmitTodo
     | ToggleFilter
     | RemoveFilter
-    | DelTodo Int
-    | ToggleTodo Int
+    | DelTodo String
+    | ToggleTodo String
     | GotTodos (WebData (List Todo))
-    | PostedTodo Int (WebData Todo)
+    | PostedTodo (WebData (Maybe Todo))
 
 
 type alias Todo =
-    { id : Int
+    { id : String
     , value : String
     , done : Bool
     }
@@ -75,27 +76,10 @@ update msg model =
             )
 
         SubmitTodo ->
-            let
-                ( newTodos, cmd ) =
-                    RemoteData.update addTodo model.todos
-
-                addTodo : List Todo -> ( List Todo, Cmd Msg )
-                addTodo todos =
-                    let
-                        newTodo =
-                            { id = uniqueId (List.map .id todos)
-                            , value = model.newTodo
-                            , done = False
-                            }
-                    in
-                    ( newTodo :: todos
-                    , Requests.postTodo
-                        (RemoteData.fromResult >> PostedTodo newTodo.id)
-                        (Requests.NewTodo model.newTodo)
-                    )
-            in
-            ( { model | todos = newTodos, newTodo = "" }
-            , cmd
+            ( { model | newTodo = "" }
+            , Requests.postTodo
+                (RemoteData.fromResult >> PostedTodo)
+                { value = model.newTodo }
             )
 
         ToggleFilter ->
@@ -164,25 +148,14 @@ update msg model =
             , Cmd.none
             )
 
-        PostedTodo oldId response ->
-            case RemoteData.toMaybe response of
-                Nothing ->
-                    ( model
-                    , Cmd.none
-                    )
-
-                Just newTodo ->
-                    let
-                        amendId : List Todo -> List Todo
-                        amendId todos =
-                            List.Extra.updateIf (\t -> t.id == oldId) updateId todos
-
-                        updateId todo =
-                            { todo | id = newTodo.id }
-                    in
-                    ( { model | todos = RemoteData.map amendId model.todos }
-                    , Cmd.none
-                    )
+        PostedTodo response ->
+            let
+                appendTodo maybeNewTodo todos =
+                    List.append (MaybeE.toList maybeNewTodo) todos
+            in
+            ( { model | todos = RemoteData.map2 appendTodo response model.todos }
+            , Cmd.none
+            )
 
 
 
