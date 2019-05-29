@@ -1,0 +1,9 @@
+/data
+
+# api
+.stack-work
+
+# client
+elm-stuff
+dist
+index.html
