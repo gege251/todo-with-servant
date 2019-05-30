@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.1.
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4aa56e132e8bf8fb12a3eff105b66a1577c67769bc9bfcaea28c70ebf09f5586
+-- hash: 686161d3d5fa03363d8f3fceea624976e8882c1755afea7e2d54d354ed695b84
 
 name:           servant-persistent-todoapi
 version:        0.1.0.0
@@ -12,6 +12,7 @@ description:    Please see the README on Github at <https://github.com/gege251/s
 homepage:       https://github.com/gege251/servant-persistent-todoapi#readme
 bug-reports:    https://github.com/gege251/servant-persistent-todoapi/issues
 author:         Szabo Gergely
+maintainer:     Szabo Gergely
 copyright:      2018 Szabo Gergely
 license:        BSD3
 build-type:     Simple
@@ -21,6 +22,12 @@ source-repository head
   location: https://github.com/gege251/servant-persistent-todoapi
 
 library
+  exposed-modules:
+      App
+      Config
+      Model.Todo
+  other-modules:
+      Paths_servant_persistent_todoapi
   hs-source-dirs:
       src
   default-extensions: NoImplicitPrelude OverloadedStrings DataKinds ScopedTypeVariables DuplicateRecordFields QuasiQuotes RankNTypes FlexibleContexts FlexibleInstances TypeOperators TypeFamilies
@@ -30,7 +37,6 @@ library
     , base
     , elm-export
     , monad-logger
-    , persistent-template
     , postgresql-typed
     , protolude >=0.2 && <1
     , resource-pool
@@ -44,16 +50,6 @@ library
     , wai
     , wai-cors
     , warp
-  exposed-modules:
-      Api
-      App
-      CodeGens.Docs
-      CodeGens.Elm
-      Config
-      Model.Todo
-      TodoActions
-  other-modules:
-      Paths_servant_persistent_todoapi
   default-language: Haskell2010
 
 executable todoapi
@@ -69,7 +65,6 @@ executable todoapi
     , base
     , elm-export
     , monad-logger
-    , persistent-template
     , postgresql-typed
     , protolude >=0.2 && <1
     , resource-pool
@@ -99,7 +94,6 @@ executable todoapi-gen-docs
     , base
     , elm-export
     , monad-logger
-    , persistent-template
     , postgresql-typed
     , protolude >=0.2 && <1
     , resource-pool
@@ -129,7 +123,6 @@ executable todoapi-gen-elm
     , base
     , elm-export
     , monad-logger
-    , persistent-template
     , postgresql-typed
     , protolude >=0.2 && <1
     , resource-pool
@@ -149,6 +142,9 @@ executable todoapi-gen-elm
 test-suite spec
   type: exitcode-stdio-1.0
   main-is: Spec.hs
+  other-modules:
+      AppSpec
+      Paths_servant_persistent_todoapi
   hs-source-dirs:
       test
   default-extensions: NoImplicitPrelude OverloadedStrings DataKinds ScopedTypeVariables DuplicateRecordFields QuasiQuotes RankNTypes FlexibleContexts FlexibleInstances TypeOperators TypeFamilies
@@ -161,7 +157,6 @@ test-suite spec
     , http-client
     , http-types
     , monad-logger
-    , persistent-template
     , postgresql-typed
     , protolude >=0.2 && <1
     , resource-pool
@@ -177,7 +172,4 @@ test-suite spec
     , wai
     , wai-cors
     , warp
-  other-modules:
-      AppSpec
-      Paths_servant_persistent_todoapi
   default-language: Haskell2010
