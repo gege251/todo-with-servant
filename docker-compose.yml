@@ -12,14 +12,15 @@ services:
     build: ./api/
     stdin_open: true
     volumes:
-      - .:/opt/server
+      - ./api/src:/app/src
+      - ./api/app:/app/app
     ports:
-      - 3000:3000
+      - 3030:3030
     depends_on:
       - db
     command:
       [
-        "./wait-for-it.sh",
+        "/app/wait-for-it.sh",
         "db:5432",
         "--",
         "stack",
@@ -32,4 +33,11 @@ services:
       - TPG_DB=postgres
       - TPG_USER=postgres
       - TPG_PASS=
-      - PORT=3000
+      - PORT=3030
+
+  client:
+    build: ./client/
+    ports:
+      - 8000:8000
+    volumes:
+      - ./client/src:/app/src

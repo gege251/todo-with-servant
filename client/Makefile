@@ -3,3 +3,6 @@ build:
 
 dev:
 	elm-live ./src/Main.elm -- --debug
+
+serve:
+	./node_modules/serve/bin/serve.js -l 8000
