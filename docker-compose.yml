@@ -7,3 +7,18 @@ services:
       - 5432:5432
     volumes:
       - ./data/postgresql:/var/lib/postgresql/data
+
+  api:
+    build: ./api/
+    stdin_open: true
+    volumes:
+      - .:/opt/server
+    ports:
+      - 3000:3000
+    links:
+      - db
+    environment:
+      - TPG_HOST=db
+      - TPG_DB=postgres
+      - TPG_USER=postgres
+      - TPG_PASS=
