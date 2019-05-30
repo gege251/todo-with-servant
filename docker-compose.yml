@@ -22,3 +22,4 @@ services:
       - TPG_DB=postgres
       - TPG_USER=postgres
       - TPG_PASS=
+      - PORT=3000

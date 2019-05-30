@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 686161d3d5fa03363d8f3fceea624976e8882c1755afea7e2d54d354ed695b84
+-- hash: fd72d316fcfcb5b12a51ad4476dbac490b22a43884ecf79aaf2a9cdfd95cf8f4
 
 name:           servant-persistent-todoapi
 version:        0.1.0.0
@@ -23,9 +23,13 @@ source-repository head
 
 library
   exposed-modules:
+      Api
       App
+      CodeGens.Docs
+      CodeGens.Elm
       Config
       Model.Todo
+      TodoActions
   other-modules:
       Paths_servant_persistent_todoapi
   hs-source-dirs:

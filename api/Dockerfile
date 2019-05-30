@@ -7,9 +7,7 @@ COPY ./package.yaml /app/package.yaml
 RUN stack build --only-dependencies
 
 COPY . /app
-RUN stack build
-RUN stack install
 
 EXPOSE 3000
 
-CMD ["stack", "exec" ,"todoapi"]
+CMD ["stack", "build", "--exec", "todoapi"]
