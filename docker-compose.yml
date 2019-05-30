@@ -15,8 +15,18 @@ services:
       - .:/opt/server
     ports:
       - 3000:3000
-    links:
+    depends_on:
       - db
+    command:
+      [
+        "./wait-for-it.sh",
+        "db:5432",
+        "--",
+        "stack",
+        "build",
+        "--exec",
+        "todoapi",
+      ]
     environment:
       - TPG_HOST=db
       - TPG_DB=postgres

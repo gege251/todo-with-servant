@@ -10,4 +10,4 @@ COPY . /app
 
 EXPOSE 3000
 
-CMD ["stack", "build", "--exec", "todoapi"]
+CMD ["stack", "build"]
