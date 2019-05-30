@@ -1,6 +1,14 @@
+export TPG_HOST=localhost
+export TPG_DB=postgres
+export TPG_USER=postgres
+export TPG_PASS=
+
 dev:
 	stack build
-	stack exec -- todoapi
+	stack ghci servant-persistent-todoapi:exe:todoapi
+
+build:
+	stack build
 
 gen-elm:
 	stack build

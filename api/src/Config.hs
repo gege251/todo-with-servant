@@ -30,6 +30,21 @@ corsMethods :: [ByteString]
 corsMethods = ["GET", "PUT", "DELETE", "OPTIONS"]
 
 
-pgConfig :: PGDatabase
-pgConfig =
-  defaultPGDatabase { pgDBName = "gergo", pgDBUser = "postgres", pgDBPass = "" }
+data DBConfig = DBConfig
+    { dbHost :: Maybe [Char]
+    , dbName :: Maybe [Char]
+    , dbUser :: Maybe [Char]
+    , dbPass :: Maybe [Char]
+    }
+
+
+toPGConfig :: DBConfig -> PGDatabase
+toPGConfig (DBConfig host name user password) = defaultPGDatabase
+  { pgDBHost = fallbackToDefault pgDBHost host
+  , pgDBName = fallbackToDefault pgDBName (mapToByteString name)
+  , pgDBUser = fallbackToDefault pgDBUser (mapToByteString user)
+  , pgDBPass = fallbackToDefault pgDBPass (mapToByteString password)
+  }
+ where
+  mapToByteString = map (strConv Strict)
+  fallbackToDefault field = fromMaybe (field defaultPGDatabase)

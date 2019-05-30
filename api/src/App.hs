@@ -23,10 +23,14 @@ import           Network.Wai.Handler.Warp       ( defaultSettings
 import           Api                            ( todoApi
                                                 , server
                                                 )
-import           Database.PostgreSQL.Typed      ( pgConnect
+import           Database.PostgreSQL.Typed      ( PGDatabase(..)
+                                                , pgConnect
                                                 , pgDisconnect
                                                 )
 import           Servant.Server                 ( serve )
+import           Config                         ( DBConfig(..)
+                                                , toPGConfig
+                                                )
 import qualified Config
 
 
@@ -35,25 +39,31 @@ import qualified Config
 
 run :: IO ()
 run = do
-  envPort      <- lookupEnv "PORT"
-  pgConnection <- pgConnect Config.pgConfig
+  envPort   <- lookupEnv "PORT"
+  envDBHost <- lookupEnv "TPG_HOST"
+  envDBName <- lookupEnv "TPG_DB"
+  envDBUser <- lookupEnv "TPG_USER"
+  envDBPass <- lookupEnv "TPG_PASS"
 
   let parsedPort = envPort >>= \p -> readMaybe p :: Maybe Int
+  let pgConfig   = toPGConfig $ DBConfig envDBHost envDBName envDBUser envDBPass
 
-  let port     = fromMaybe Config.defaultPort parsedPort
+  let port       = fromMaybe Config.defaultPort parsedPort
 
-      settings = setPort port $ setBeforeMainLoop
+
+  let settings = setPort port $ setBeforeMainLoop
         (hPutStrLn stderr ("listening on port " <> show port))
         defaultSettings
 
-      policy = simpleCorsResourcePolicy
+  let policy = simpleCorsResourcePolicy
         { corsOrigins        = Just ([Config.feHost], False)
         , corsMethods        = Config.corsMethods
         , corsRequestHeaders = ["content-type"]
         }
 
+  pgConnection <- pgConnect pgConfig
+
   let application =
         cors (const $ Just policy) $ serve todoApi $ server pgConnection
-
 
   runSettings settings application `finally` pgDisconnect pgConnection
