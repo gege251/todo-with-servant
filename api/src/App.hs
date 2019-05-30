@@ -23,8 +23,7 @@ import           Network.Wai.Handler.Warp       ( defaultSettings
 import           Api                            ( todoApi
                                                 , server
                                                 )
-import           Database.PostgreSQL.Typed      ( PGDatabase(..)
-                                                , pgConnect
+import           Database.PostgreSQL.Typed      ( pgConnect
                                                 , pgDisconnect
                                                 )
 import           Servant.Server                 ( serve )
