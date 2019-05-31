@@ -1,13 +1,9 @@
-export TPG_HOST=localhost
 export TPG_DB=postgres
 export TPG_USER=postgres
 export TPG_PASS=
 
 dev:
-	stack ghci
-
-dev-main:
-	stack ghci todoapi:exe:todoapi
+	stack build --fast --file-watch --exec "bash -c \"pkill todoapi; stack exec todoapi &\""
 
 build:
 	stack build

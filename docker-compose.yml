@@ -18,21 +18,9 @@ services:
       - 3030:3030
     depends_on:
       - db
-    command:
-      [
-        "/app/wait-for-it.sh",
-        "db:5432",
-        "--",
-        "stack",
-        "build",
-        "--exec",
-        "todoapi",
-      ]
+    command: ["/app/wait-for-it.sh", "db:5432", "--", "make", "dev"]
     environment:
       - TPG_HOST=db
-      - TPG_DB=postgres
-      - TPG_USER=postgres
-      - TPG_PASS=
       - PORT=3030
 
   client:
