@@ -4,9 +4,9 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: fd72d316fcfcb5b12a51ad4476dbac490b22a43884ecf79aaf2a9cdfd95cf8f4
+-- hash: ed0acf2b7b828b9f0960bdeaa40f5f8bed4ab2c20b1dd2b77720b6220bb3ac67
 
-name:           servant-persistent-todoapi
+name:           todoapi
 version:        0.1.0.0
 description:    Please see the README on Github at <https://github.com/gege251/servant-persitent-todoapi#readme>
 homepage:       https://github.com/gege251/servant-persistent-todoapi#readme
@@ -27,11 +27,12 @@ library
       App
       CodeGens.Docs
       CodeGens.Elm
+      CodeGens.Swagger
       Config
       Model.Todo
       TodoActions
   other-modules:
-      Paths_servant_persistent_todoapi
+      Paths_todoapi
   hs-source-dirs:
       src
   default-extensions: NoImplicitPrelude OverloadedStrings DataKinds ScopedTypeVariables DuplicateRecordFields QuasiQuotes RankNTypes FlexibleContexts FlexibleInstances TypeOperators TypeFamilies
@@ -40,26 +41,29 @@ library
       aeson
     , base
     , elm-export
+    , lens
     , monad-logger
     , postgresql-typed
     , protolude >=0.2 && <1
-    , resource-pool
     , servant
     , servant-docs
     , servant-elm
     , servant-server <=0.13
+    , servant-swagger
+    , swagger2
     , text
     , transformers
     , uuid
     , wai
     , wai-cors
     , warp
+    , yaml
   default-language: Haskell2010
 
 executable todoapi
   main-is: Main.hs
   other-modules:
-      Paths_servant_persistent_todoapi
+      Paths_todoapi
   hs-source-dirs:
       exe/TodoApi
   default-extensions: NoImplicitPrelude OverloadedStrings DataKinds ScopedTypeVariables DuplicateRecordFields QuasiQuotes RankNTypes FlexibleContexts FlexibleInstances TypeOperators TypeFamilies
@@ -68,27 +72,30 @@ executable todoapi
       aeson
     , base
     , elm-export
+    , lens
     , monad-logger
     , postgresql-typed
     , protolude >=0.2 && <1
-    , resource-pool
     , servant
     , servant-docs
     , servant-elm
-    , servant-persistent-todoapi
     , servant-server <=0.13
+    , servant-swagger
+    , swagger2
     , text
+    , todoapi
     , transformers
     , uuid
     , wai
     , wai-cors
     , warp
+    , yaml
   default-language: Haskell2010
 
 executable todoapi-gen-docs
   main-is: Main.hs
   other-modules:
-      Paths_servant_persistent_todoapi
+      Paths_todoapi
   hs-source-dirs:
       exe/GenerateDocs
   default-extensions: NoImplicitPrelude OverloadedStrings DataKinds ScopedTypeVariables DuplicateRecordFields QuasiQuotes RankNTypes FlexibleContexts FlexibleInstances TypeOperators TypeFamilies
@@ -97,27 +104,30 @@ executable todoapi-gen-docs
       aeson
     , base
     , elm-export
+    , lens
     , monad-logger
     , postgresql-typed
     , protolude >=0.2 && <1
-    , resource-pool
     , servant
     , servant-docs
     , servant-elm
-    , servant-persistent-todoapi
     , servant-server <=0.13
+    , servant-swagger
+    , swagger2
     , text
+    , todoapi
     , transformers
     , uuid
     , wai
     , wai-cors
     , warp
+    , yaml
   default-language: Haskell2010
 
 executable todoapi-gen-elm
   main-is: Main.hs
   other-modules:
-      Paths_servant_persistent_todoapi
+      Paths_todoapi
   hs-source-dirs:
       exe/GenerateElm
   default-extensions: NoImplicitPrelude OverloadedStrings DataKinds ScopedTypeVariables DuplicateRecordFields QuasiQuotes RankNTypes FlexibleContexts FlexibleInstances TypeOperators TypeFamilies
@@ -126,21 +136,56 @@ executable todoapi-gen-elm
       aeson
     , base
     , elm-export
+    , lens
     , monad-logger
     , postgresql-typed
     , protolude >=0.2 && <1
-    , resource-pool
     , servant
     , servant-docs
     , servant-elm
-    , servant-persistent-todoapi
     , servant-server <=0.13
+    , servant-swagger
+    , swagger2
     , text
+    , todoapi
     , transformers
     , uuid
     , wai
     , wai-cors
     , warp
+    , yaml
+  default-language: Haskell2010
+
+executable todoapi-gen-swagger
+  main-is: Main.hs
+  other-modules:
+      Paths_todoapi
+  hs-source-dirs:
+      exe/GenerateSwagger
+  default-extensions: NoImplicitPrelude OverloadedStrings DataKinds ScopedTypeVariables DuplicateRecordFields QuasiQuotes RankNTypes FlexibleContexts FlexibleInstances TypeOperators TypeFamilies
+  ghc-options: -Wall -fno-warn-orphans
+  build-depends:
+      aeson
+    , base
+    , elm-export
+    , lens
+    , monad-logger
+    , postgresql-typed
+    , protolude >=0.2 && <1
+    , servant
+    , servant-docs
+    , servant-elm
+    , servant-server <=0.13
+    , servant-swagger
+    , swagger2
+    , text
+    , todoapi
+    , transformers
+    , uuid
+    , wai
+    , wai-cors
+    , warp
+    , yaml
   default-language: Haskell2010
 
 test-suite spec
@@ -148,7 +193,7 @@ test-suite spec
   main-is: Spec.hs
   other-modules:
       AppSpec
-      Paths_servant_persistent_todoapi
+      Paths_todoapi
   hs-source-dirs:
       test
   default-extensions: NoImplicitPrelude OverloadedStrings DataKinds ScopedTypeVariables DuplicateRecordFields QuasiQuotes RankNTypes FlexibleContexts FlexibleInstances TypeOperators TypeFamilies
@@ -160,20 +205,23 @@ test-suite spec
     , hspec
     , http-client
     , http-types
+    , lens
     , monad-logger
     , postgresql-typed
     , protolude >=0.2 && <1
-    , resource-pool
     , servant
     , servant-client
     , servant-docs
     , servant-elm
-    , servant-persistent-todoapi
     , servant-server <=0.13
+    , servant-swagger
+    , swagger2
     , text
+    , todoapi
     , transformers
     , uuid
     , wai
     , wai-cors
     , warp
+    , yaml
   default-language: Haskell2010

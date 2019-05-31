@@ -1,9 +1,9 @@
 module Api where
 
 import           Protolude
-import           GHC.Int                        ( Int64 )
 import           Servant
 import           Servant.Docs
+import           Data.Aeson                     ( toJSON )
 import           Database.PostgreSQL.Typed      ( PGConnection
                                                 , pgQuery
                                                 , pgExecute
