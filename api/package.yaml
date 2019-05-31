@@ -1,4 +1,4 @@
-name: servant-persistent-todoapi
+name: todoapi
 version: 0.1.0.0
 github: "gege251/servant-persistent-todoapi"
 license: BSD3
@@ -16,7 +16,7 @@ tests:
       - test
     dependencies:
       - hspec
-      - servant-persistent-todoapi
+      - todoapi
       - servant-client
       - warp
       - http-client
@@ -31,19 +31,25 @@ executables:
     main: Main.hs
     source-dirs: exe/TodoApi
     dependencies:
-      - servant-persistent-todoapi
+      - todoapi
 
   todoapi-gen-elm:
     main: Main.hs
     source-dirs: exe/GenerateElm
     dependencies:
-      - servant-persistent-todoapi
+      - todoapi
 
   todoapi-gen-docs:
     main: Main.hs
     source-dirs: exe/GenerateDocs
     dependencies:
-      - servant-persistent-todoapi
+      - todoapi
+
+  todoapi-gen-swagger:
+    main: Main.hs
+    source-dirs: exe/GenerateSwagger
+    dependencies:
+      - todoapi
 
 default-extensions:
   - NoImplicitPrelude
@@ -59,8 +65,10 @@ default-extensions:
   - TypeFamilies
 
 dependencies:
+  - lens
   - protolude >= 0.2 && < 1
   - aeson
+  - yaml
   - base
   - text
   - elm-export
@@ -68,12 +76,13 @@ dependencies:
   - servant-server <= 0.13
   - servant-elm
   - servant-docs
+  - servant-swagger
+  - swagger2
   - transformers
   - aeson
   - wai
   - wai-cors
   - warp
   - postgresql-typed
-  - resource-pool
   - monad-logger
   - uuid

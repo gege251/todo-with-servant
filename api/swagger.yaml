@@ -1,0 +1,125 @@
+swagger: '2.0'
+info:
+  version: '1.0'
+  title: Todo API
+  license:
+    url: http://mit.com
+    name: MIT
+  description: This is an API that tests swagger integration
+definitions:
+  Todo:
+    example:
+      done: false
+      value: buy me a beer
+      id: uuid-1234
+    required:
+    - id
+    - value
+    - done
+    type: object
+    description: This is some real Todo right here
+    properties:
+      done:
+        type: boolean
+      value:
+        type: string
+      id:
+        type: string
+  NewTodo:
+    example:
+      value: buy me a beer
+    required:
+    - value
+    type: object
+    description: This is a new todo
+    properties:
+      value:
+        type: string
+paths:
+  /todo/{todoId}:
+    get:
+      responses:
+        404:
+          description: ! '`todoId` not found'
+        200:
+          schema:
+            $ref: ! '#/definitions/Todo'
+          description: ''
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - required: true
+        in: path
+        name: todoId
+        type: string
+    delete:
+      responses:
+        404:
+          description: ! '`todoId` not found'
+        202:
+          description: ''
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - required: true
+        in: path
+        name: todoId
+        type: string
+    put:
+      consumes:
+      - application/json;charset=utf-8
+      responses:
+        404:
+          description: ! '`todoId` not found'
+        202:
+          description: ''
+        400:
+          description: Invalid `body`
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - required: true
+        in: path
+        name: todoId
+        type: string
+      - required: true
+        schema:
+          $ref: ! '#/definitions/Todo'
+        in: body
+        name: body
+  /todo:
+    post:
+      consumes:
+      - application/json;charset=utf-8
+      responses:
+        400:
+          description: Invalid `body`
+        201:
+          schema:
+            $ref: ! '#/definitions/Todo'
+          description: ''
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - required: true
+        schema:
+          $ref: ! '#/definitions/NewTodo'
+        in: body
+        name: body
+    get:
+      responses:
+        400:
+          description: Invalid `done`
+        200:
+          schema:
+            items:
+              $ref: ! '#/definitions/Todo'
+            type: array
+          description: ''
+      produces:
+      - application/json;charset=utf-8
+      parameters:
+      - required: false
+        in: query
+        name: done
+        type: boolean

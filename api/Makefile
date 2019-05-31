@@ -18,3 +18,6 @@ gen-elm:
 
 gen-docs:
 	stack build --exec todoapi-gen-docs
+
+gen-swagger:
+	stack build --exec todoapi-gen-swagger

@@ -1,9 +1,21 @@
 module Api where
 
 import           Protolude
+import           Control.Lens                   ( (&)
+                                                , (?~)
+                                                , mapped
+                                                )
 import           Servant
 import           Servant.Docs
 import           Data.Aeson                     ( toJSON )
+import           Data.Swagger                   ( ToSchema
+                                                , declareNamedSchema
+                                                , example
+                                                , schema
+                                                , description
+                                                , defaultSchemaOptions
+                                                , genericDeclareNamedSchema
+                                                )
 import           Database.PostgreSQL.Typed      ( PGConnection
                                                 , pgQuery
                                                 , pgExecute
@@ -62,5 +74,15 @@ instance ToSample Int64 where
 instance ToSample Todo where
   toSamples _ = singleSample (Todo "uuid-1234" "buy me a beer" False)
 
+instance ToSchema Todo where
+    declareNamedSchema proxy = genericDeclareNamedSchema defaultSchemaOptions proxy
+        & (mapped.schema.description ?~ "This is some real Todo right here")
+        & (mapped.schema.example ?~ toJSON (Todo "uuid-1234" "buy me a beer" False))
+
 instance ToSample NewTodo where
   toSamples _ = singleSample (NewTodo "buy me a beer")
+
+instance ToSchema NewTodo where
+    declareNamedSchema proxy = genericDeclareNamedSchema defaultSchemaOptions proxy
+        & (mapped.schema.description ?~ "This is a new todo")
+        & (mapped.schema.example ?~ toJSON (NewTodo "buy me a beer"))
