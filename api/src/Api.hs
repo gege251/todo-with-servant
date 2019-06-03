@@ -39,10 +39,10 @@ type TodoApi =
   :<|> "todo" :> ReqBody '[JSON] NewTodo :> PostCreated '[JSON] (Maybe Todo)
 
   -- DELETE /todo/:todoid Deletes todo with the given ID
-  :<|> "todo" :> Capture "todoId" Text :> DeleteAccepted '[JSON] NoContent
+  :<|> "todo" :> Capture "todoId" Text :> DeleteAccepted '[JSON] ()
 
   -- PUT /todo/:todoid Replaces todo of the given ID
-  :<|> "todo" :> Capture "todoId" Text :> ReqBody '[JSON] Todo :> PutAccepted '[JSON] NoContent
+  :<|> "todo" :> Capture "todoId" Text :> ReqBody '[JSON] Todo :> PutAccepted '[JSON] ()
 
 
 todoApi :: Proxy TodoApi
@@ -70,6 +70,9 @@ instance ToCapture (Capture "todoId" Text) where
 
 instance ToSample Int64 where
   toSamples _ = singleSample 1
+
+instance ToSample () where
+  toSamples _ = singleSample ()
 
 instance ToSample Todo where
   toSamples _ = singleSample (Todo "uuid-1234" "buy me a beer" False)

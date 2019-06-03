@@ -1,5 +1,8 @@
-{-# LANGUAGE DeriveGeneric              #-}
-{-# LANGUAGE DuplicateRecordFields      #-}
+{-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE TypeOperators     #-}
+{-# LANGUAGE DeriveGeneric     #-}
 
 module Model.Todo where
 
@@ -10,8 +13,10 @@ import           GHC.Generics                   ( Generic )
 import           Data.Aeson                     ( FromJSON
                                                 , ToJSON
                                                 )
-import           Servant.Elm                    ( ElmType )
 
+import           Elm.Derive                     ( defaultOptions
+                                                , deriveElmDef
+                                                )
 
 -- TODO
 
@@ -19,20 +24,23 @@ data Todo = Todo
   { id :: Text
   , value :: Text
   , done :: Bool
-  } deriving (Eq, Show, Generic)
+  } deriving (Generic)
 
+deriveElmDef defaultOptions ''Todo
 
 instance FromJSON Todo
 instance ToJSON Todo
-instance ElmType Todo
+
 
 
 newtype NewTodo = NewTodo
-  { value :: Text } deriving Generic
+  { value :: Text } deriving (Generic)
+
+deriveElmDef defaultOptions ''NewTodo
 
 instance FromJSON NewTodo
 instance ToJSON NewTodo
-instance ElmType NewTodo
+
 
 
 createTodo :: NewTodo -> IO (Maybe Todo)

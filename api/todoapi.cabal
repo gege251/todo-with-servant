@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ed0acf2b7b828b9f0960bdeaa40f5f8bed4ab2c20b1dd2b77720b6220bb3ac67
+-- hash: 65888cbd5479ef2caf120a75b9852f7a5aaf5561455f13a7accacdbc3e038abe
 
 name:           todoapi
 version:        0.1.0.0
@@ -40,14 +40,14 @@ library
   build-depends:
       aeson
     , base
-    , elm-export
+    , elm-bridge
     , lens
     , monad-logger
     , postgresql-typed
     , protolude >=0.2 && <1
     , servant
     , servant-docs
-    , servant-elm
+    , servant-elm >=0.6
     , servant-server <=0.13
     , servant-swagger
     , swagger2
@@ -71,14 +71,46 @@ executable todoapi
   build-depends:
       aeson
     , base
-    , elm-export
+    , elm-bridge
     , lens
     , monad-logger
     , postgresql-typed
     , protolude >=0.2 && <1
     , servant
     , servant-docs
-    , servant-elm
+    , servant-elm >=0.6
+    , servant-server <=0.13
+    , servant-swagger
+    , swagger2
+    , text
+    , todoapi
+    , transformers
+    , uuid
+    , wai
+    , wai-cors
+    , warp
+    , yaml
+  default-language: Haskell2010
+
+executable todoapi-db-migrations
+  main-is: Main.hs
+  other-modules:
+      Paths_todoapi
+  hs-source-dirs:
+      exe/DBMigrations
+  default-extensions: NoImplicitPrelude OverloadedStrings DataKinds ScopedTypeVariables DuplicateRecordFields QuasiQuotes RankNTypes FlexibleContexts FlexibleInstances TypeOperators TypeFamilies
+  ghc-options: -Wall -fno-warn-orphans
+  build-depends:
+      aeson
+    , base
+    , elm-bridge
+    , lens
+    , monad-logger
+    , postgresql-typed
+    , protolude >=0.2 && <1
+    , servant
+    , servant-docs
+    , servant-elm >=0.6
     , servant-server <=0.13
     , servant-swagger
     , swagger2
@@ -103,14 +135,14 @@ executable todoapi-gen-docs
   build-depends:
       aeson
     , base
-    , elm-export
+    , elm-bridge
     , lens
     , monad-logger
     , postgresql-typed
     , protolude >=0.2 && <1
     , servant
     , servant-docs
-    , servant-elm
+    , servant-elm >=0.6
     , servant-server <=0.13
     , servant-swagger
     , swagger2
@@ -135,14 +167,14 @@ executable todoapi-gen-elm
   build-depends:
       aeson
     , base
-    , elm-export
+    , elm-bridge
     , lens
     , monad-logger
     , postgresql-typed
     , protolude >=0.2 && <1
     , servant
     , servant-docs
-    , servant-elm
+    , servant-elm >=0.6
     , servant-server <=0.13
     , servant-swagger
     , swagger2
@@ -167,14 +199,14 @@ executable todoapi-gen-swagger
   build-depends:
       aeson
     , base
-    , elm-export
+    , elm-bridge
     , lens
     , monad-logger
     , postgresql-typed
     , protolude >=0.2 && <1
     , servant
     , servant-docs
-    , servant-elm
+    , servant-elm >=0.6
     , servant-server <=0.13
     , servant-swagger
     , swagger2
@@ -201,7 +233,7 @@ test-suite spec
   build-depends:
       aeson
     , base
-    , elm-export
+    , elm-bridge
     , hspec
     , http-client
     , http-types
@@ -212,7 +244,7 @@ test-suite spec
     , servant
     , servant-client
     , servant-docs
-    , servant-elm
+    , servant-elm >=0.6
     , servant-server <=0.13
     , servant-swagger
     , swagger2

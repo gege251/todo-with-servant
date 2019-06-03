@@ -1,11 +1,7 @@
 resolver: lts-11.1
 packages:
   - "."
-  - location:
-      git: https://github.com/gege251/servant-elm
-      commit: 16705b3958894812352a4619ebdd010cc2f2673e
-    extra-dep: true
-  - location:
-      git: https://github.com/gege251/elm-export
-      commit: fdee43cee30822836bdde1f231fdf1e909a68e80
-    extra-dep: true
+
+extra-deps:
+  - servant-elm-0.6.0.2
+  - elm-bridge-0.5.1

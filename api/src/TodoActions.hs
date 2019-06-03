@@ -4,8 +4,7 @@ import           Protolude
 import           Database.PostgreSQL.Typed.Query ( PGSimpleQuery  )
 import           Database.PostgreSQL.Typed      ( pgSQL  )
 
-import           Servant                        ( NoContent(NoContent)
-                                                , Handler
+import           Servant                        ( Handler
                                                 )
 
 import           Model.Todo
@@ -53,13 +52,13 @@ putTodo dbExec todoVal = do
         pure $ Just newTodo
 
 
-delTodo :: DBExec -> Text -> Handler NoContent
+delTodo :: DBExec -> Text -> Handler ()
 delTodo dbExec todoId = do
   _ <- liftIO $ dbExec [pgSQL|DELETE FROM todo WHERE id = ${todoId}|]
-  pure NoContent
+  pure ()
 
 
-updateTodo :: DBExec -> Text -> Todo -> Handler NoContent
+updateTodo :: DBExec -> Text -> Todo -> Handler ()
 updateTodo dbExec todoId (Todo _ todoValue todoDone) = do
   _ <- liftIO $ dbExec 
     [pgSQL|
@@ -67,4 +66,4 @@ updateTodo dbExec todoId (Todo _ todoValue todoDone) = do
 		SET value=${todoValue}, done=${todoDone}
 		WHERE id = ${todoId}
 	|]
-  pure NoContent
+  pure ()

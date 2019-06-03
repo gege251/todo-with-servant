@@ -51,6 +51,12 @@ executables:
     dependencies:
       - todoapi
 
+  todoapi-db-migrations:
+    main: Main.hs
+    source-dirs: exe/DBMigrations
+    dependencies:
+      - todoapi
+
 default-extensions:
   - NoImplicitPrelude
   - OverloadedStrings
@@ -71,10 +77,10 @@ dependencies:
   - yaml
   - base
   - text
-  - elm-export
+  - elm-bridge
   - servant
   - servant-server <= 0.13
-  - servant-elm
+  - servant-elm >= 0.6
   - servant-docs
   - servant-swagger
   - swagger2
