@@ -17,3 +17,7 @@ gen-docs:
 
 gen-swagger:
 	stack build --exec todoapi-gen-swagger
+
+db-migrations:
+	stack build --exec todoapi-db-migrations
+
