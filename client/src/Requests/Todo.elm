@@ -1,16 +1,15 @@
-module Requests.Todo exposing (NewTodo, NoContent(..), Todo, decodeTodo, deleteTodoByTodoId, encodeNewTodo, encodeTodo, getTodo, getTodoByTodoId, postTodo, putTodoByTodoId)
+module Requests.Todo exposing (NewTodo, Todo, deleteTodoByTodoId, getTodo, getTodoByTodoId, jsonDecNewTodo, jsonDecTodo, jsonEncNewTodo, jsonEncTodo, postTodo, putTodoByTodoId)
 
+-- The following module comes from bartavelle/json-helpers
+
+import Dict exposing (Dict)
 import Http
-import Json.Decode exposing (..)
-import Json.Decode.Pipeline exposing (..)
-import Json.Encode
-import Maybe.Extra
+import Json.Decode
+import Json.Encode exposing (Value)
+import Json.Helpers exposing (..)
+import Set
 import String
 import Url.Builder
-
-
-type NoContent
-    = NoContent
 
 
 type alias Todo =
@@ -20,37 +19,59 @@ type alias Todo =
     }
 
 
+jsonDecTodo : Json.Decode.Decoder Todo
+jsonDecTodo =
+    Json.Decode.succeed (\pid pvalue pdone -> { id = pid, value = pvalue, done = pdone })
+        |> required "id" Json.Decode.string
+        |> required "value" Json.Decode.string
+        |> required "done" Json.Decode.bool
+
+
+jsonEncTodo : Todo -> Value
+jsonEncTodo val =
+    Json.Encode.object
+        [ ( "id", Json.Encode.string val.id )
+        , ( "value", Json.Encode.string val.value )
+        , ( "done", Json.Encode.bool val.done )
+        ]
+
+
 type alias NewTodo =
     { value : String
     }
 
 
-decodeTodo : Decoder Todo
-decodeTodo =
-    Json.Decode.succeed Todo
-        |> required "id" string
-        |> required "value" string
-        |> required "done" bool
+jsonDecNewTodo : Json.Decode.Decoder NewTodo
+jsonDecNewTodo =
+    Json.Decode.succeed (\pvalue -> { value = pvalue }) |> custom Json.Decode.string
 
 
-encodeTodo : Todo -> Json.Encode.Value
-encodeTodo x =
-    Json.Encode.object
-        [ ( "id", Json.Encode.string x.id )
-        , ( "value", Json.Encode.string x.value )
-        , ( "done", Json.Encode.bool x.done )
-        ]
+jsonEncNewTodo : NewTodo -> Value
+jsonEncNewTodo val =
+    Json.Encode.string val.value
 
 
-encodeNewTodo : NewTodo -> Json.Encode.Value
-encodeNewTodo x =
-    Json.Encode.object
-        [ ( "value", Json.Encode.string x.value )
-        ]
+getTodo : Maybe Bool -> (Result Http.Error (List Todo) -> msg) -> Cmd msg
+getTodo query_done toMsg =
+    let
+        params =
+            List.filterMap identity
+                (List.concat
+                    [ [ query_done
+                            |> Maybe.map
+                                ((\value ->
+                                    if value then
+                                        "true"
 
-
-getTodo : (Result Http.Error (List Todo) -> msg) -> Maybe Bool -> Cmd msg
-getTodo toMsg query_done =
+                                    else
+                                        "false"
+                                 )
+                                    >> Url.Builder.string "done"
+                                )
+                      ]
+                    ]
+                )
+    in
     Http.request
         { method =
             "GET"
@@ -60,24 +81,11 @@ getTodo toMsg query_done =
             Url.Builder.crossOrigin "http://localhost:3030"
                 [ "todo"
                 ]
-                (List.concat
-                    [ query_done
-                        |> Maybe.Extra.toList
-                        |> List.map
-                            (\v ->
-                                if v then
-                                    "True"
-
-                                else
-                                    "False"
-                            )
-                        |> List.map (Url.Builder.string "done")
-                    ]
-                )
+                params
         , body =
             Http.emptyBody
         , expect =
-            Http.expectJson toMsg (list decodeTodo)
+            Http.expectJson toMsg (Json.Decode.list jsonDecTodo)
         , timeout =
             Nothing
         , tracker =
@@ -85,8 +93,15 @@ getTodo toMsg query_done =
         }
 
 
-getTodoByTodoId : (Result Http.Error (Maybe Todo) -> msg) -> String -> Cmd msg
-getTodoByTodoId toMsg capture_todoId =
+getTodoByTodoId : String -> (Result Http.Error (Maybe Todo) -> msg) -> Cmd msg
+getTodoByTodoId capture_todoId toMsg =
+    let
+        params =
+            List.filterMap identity
+                (List.concat
+                    []
+                )
+    in
     Http.request
         { method =
             "GET"
@@ -97,11 +112,11 @@ getTodoByTodoId toMsg capture_todoId =
                 [ "todo"
                 , capture_todoId
                 ]
-                []
+                params
         , body =
             Http.emptyBody
         , expect =
-            Http.expectJson toMsg (nullable decodeTodo)
+            Http.expectJson toMsg (Json.Decode.maybe jsonDecTodo)
         , timeout =
             Nothing
         , tracker =
@@ -109,8 +124,15 @@ getTodoByTodoId toMsg capture_todoId =
         }
 
 
-postTodo : (Result Http.Error (Maybe Todo) -> msg) -> NewTodo -> Cmd msg
-postTodo toMsg body =
+postTodo : NewTodo -> (Result Http.Error (Maybe Todo) -> msg) -> Cmd msg
+postTodo body toMsg =
+    let
+        params =
+            List.filterMap identity
+                (List.concat
+                    []
+                )
+    in
     Http.request
         { method =
             "POST"
@@ -120,11 +142,11 @@ postTodo toMsg body =
             Url.Builder.crossOrigin "http://localhost:3030"
                 [ "todo"
                 ]
-                []
+                params
         , body =
-            Http.jsonBody (encodeNewTodo body)
+            Http.jsonBody (jsonEncNewTodo body)
         , expect =
-            Http.expectJson toMsg (nullable decodeTodo)
+            Http.expectJson toMsg (Json.Decode.maybe jsonDecTodo)
         , timeout =
             Nothing
         , tracker =
@@ -132,8 +154,15 @@ postTodo toMsg body =
         }
 
 
-deleteTodoByTodoId : (Result Http.Error NoContent -> msg) -> String -> Cmd msg
-deleteTodoByTodoId toMsg capture_todoId =
+deleteTodoByTodoId : String -> (Result Http.Error () -> msg) -> Cmd msg
+deleteTodoByTodoId capture_todoId toMsg =
+    let
+        params =
+            List.filterMap identity
+                (List.concat
+                    []
+                )
+    in
     Http.request
         { method =
             "DELETE"
@@ -144,18 +173,18 @@ deleteTodoByTodoId toMsg capture_todoId =
                 [ "todo"
                 , capture_todoId
                 ]
-                []
+                params
         , body =
             Http.emptyBody
         , expect =
-            Http.expectStringResponse toMsg
-                (\response ->
-                    case response of
-                        Http.GoodStatus_ _ "" ->
-                            Ok NoContent
+            Http.expectString
+                (\x ->
+                    case x of
+                        Err e ->
+                            toMsg (Err e)
 
-                        _ ->
-                            Err (Http.BadBody "Expected the response body to be empty")
+                        Ok _ ->
+                            toMsg (Ok ())
                 )
         , timeout =
             Nothing
@@ -164,8 +193,15 @@ deleteTodoByTodoId toMsg capture_todoId =
         }
 
 
-putTodoByTodoId : (Result Http.Error NoContent -> msg) -> String -> Todo -> Cmd msg
-putTodoByTodoId toMsg capture_todoId body =
+putTodoByTodoId : String -> Todo -> (Result Http.Error () -> msg) -> Cmd msg
+putTodoByTodoId capture_todoId body toMsg =
+    let
+        params =
+            List.filterMap identity
+                (List.concat
+                    []
+                )
+    in
     Http.request
         { method =
             "PUT"
@@ -176,18 +212,18 @@ putTodoByTodoId toMsg capture_todoId body =
                 [ "todo"
                 , capture_todoId
                 ]
-                []
+                params
         , body =
-            Http.jsonBody (encodeTodo body)
+            Http.jsonBody (jsonEncTodo body)
         , expect =
-            Http.expectStringResponse toMsg
-                (\response ->
-                    case response of
-                        Http.GoodStatus_ _ "" ->
-                            Ok NoContent
+            Http.expectString
+                (\x ->
+                    case x of
+                        Err e ->
+                            toMsg (Err e)
 
-                        _ ->
-                            Err (Http.BadBody "Expected the response body to be empty")
+                        Ok _ ->
+                            toMsg (Ok ())
                 )
         , timeout =
             Nothing

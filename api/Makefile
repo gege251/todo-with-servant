@@ -9,6 +9,7 @@ build:
 	stack build
 
 gen-elm:
+	rm -rf ../clients/src/Requests
 	stack build --exec todoapi-gen-elm
 	elm-format ../client/src/Requests --elm-version=0.19 --yes
 

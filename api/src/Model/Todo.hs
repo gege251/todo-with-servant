@@ -10,12 +10,8 @@ import           Protolude
 import           Data.UUID.V1                   ( nextUUID )
 import qualified Data.UUID                     as UUID
 import           GHC.Generics                   ( Generic )
-import           Data.Aeson                     ( FromJSON
-                                                , ToJSON
-                                                )
-
 import           Elm.Derive                     ( defaultOptions
-                                                , deriveElmDef
+                                                , deriveBoth
                                                 )
 
 -- TODO
@@ -26,21 +22,13 @@ data Todo = Todo
   , done :: Bool
   } deriving (Generic)
 
-deriveElmDef defaultOptions ''Todo
-
-instance FromJSON Todo
-instance ToJSON Todo
+deriveBoth defaultOptions ''Todo
 
 
-
-newtype NewTodo = NewTodo
+data NewTodo = NewTodo
   { value :: Text } deriving (Generic)
 
-deriveElmDef defaultOptions ''NewTodo
-
-instance FromJSON NewTodo
-instance ToJSON NewTodo
-
+deriveBoth defaultOptions ''NewTodo
 
 
 createTodo :: NewTodo -> IO (Maybe Todo)

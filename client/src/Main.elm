@@ -54,7 +54,7 @@ initModel =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( initModel
-    , Requests.getTodo (RemoteData.fromResult >> GotTodos) Nothing
+    , Requests.getTodo Nothing (RemoteData.fromResult >> GotTodos)
     )
 
 
@@ -78,8 +78,8 @@ update msg model =
         SubmitTodo ->
             ( { model | newTodo = "" }
             , Requests.postTodo
-                (RemoteData.fromResult >> PostedTodo)
                 { value = model.newTodo }
+                (RemoteData.fromResult >> PostedTodo)
             )
 
         ToggleFilter ->
@@ -93,12 +93,12 @@ update msg model =
                             Just (not filter)
             in
             ( { model | filter = newFilter }
-            , Requests.getTodo (RemoteData.fromResult >> GotTodos) newFilter
+            , Requests.getTodo newFilter (RemoteData.fromResult >> GotTodos)
             )
 
         RemoveFilter ->
             ( { model | filter = Nothing }
-            , Requests.getTodo (RemoteData.fromResult >> GotTodos) Nothing
+            , Requests.getTodo Nothing (RemoteData.fromResult >> GotTodos)
             )
 
         DelTodo id ->
@@ -109,7 +109,7 @@ update msg model =
                 delTodo : List Todo -> ( List Todo, Cmd Msg )
                 delTodo todos =
                     ( List.filter (\t -> t.id /= id) todos
-                    , Requests.deleteTodoByTodoId (\_ -> NoOp) id
+                    , Requests.deleteTodoByTodoId id (\_ -> NoOp)
                     )
             in
             ( { model | todos = newTodos }
@@ -133,7 +133,7 @@ update msg model =
 
                         Just todo ->
                             ( List.Extra.setIf (\t -> t.id == id) todo todos
-                            , Requests.putTodoByTodoId (\_ -> NoOp) id todo
+                            , Requests.putTodoByTodoId id todo (\_ -> NoOp)
                             )
 
                 ( newTodos, cmd ) =

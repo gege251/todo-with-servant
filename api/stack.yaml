@@ -3,5 +3,7 @@ packages:
   - "."
 
 extra-deps:
-  - servant-elm-0.6.0.2
+  # - servant-elm-0.6.0.2
+  - git: https://github.com/gege251/servant-elm
+    commit: d9c27de2dd13675dc541af5adf7d468569e3882f
   - elm-bridge-0.5.1

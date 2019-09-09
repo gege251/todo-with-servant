@@ -6,6 +6,8 @@ import           Servant.Elm                    ( Proxy(Proxy)
                                                 , defElmOptions
                                                 , defElmImports
                                                 , generateElmModuleWith
+                                                , ElmOptions(..)
+                                                , UrlPrefix(..)
                                                 )
 import           Model.Todo                     ( Todo
                                                 , NewTodo
@@ -13,9 +15,14 @@ import           Model.Todo                     ( Todo
 import           Api                            ( TodoApi )
 
 
+elmOptions :: ElmOptions
+elmOptions =
+  defElmOptions { urlPrefix = Static "http://localhost:3030"}
+
+
 generate :: IO ()
 generate = generateElmModuleWith
-  defElmOptions
+  elmOptions
   ["Requests", "Todo"]
   defElmImports
   "../client/src"
